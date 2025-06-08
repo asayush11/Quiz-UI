@@ -15,7 +15,8 @@ export default function Result({ score, answers }) {
         {answers.map((ans, idx) => (
           <li key={idx} className="mb-2">
             Q{idx + 1}: {ans.question} = {ans.correct}<br />
-            Your answer: <span className={ans.isCorrect ? 'text-green-600' : 'text-red-600'}>{ans.selected}</span>
+            Your answer: <span className={ans.isCorrect ? 'text-green-600' : 'text-red-600'}>{ans.selected}</span><br />
+            Explanation: {ans.solution ? ans.solution : 'Trivia: No solution available.'}
           </li>
         ))}
       </ul>

@@ -96,7 +96,7 @@ export default function QuizHome() {
             options.push(data[i].option2);
             options.push(data[i].option3);
             options.push(data[i].option4);
-            generated.push({ question: data[i].question, difficulty: data[i].difficulty, Solution: data[i].Solution, correct, options: shuffle(options) });
+            generated.push({ question: data[i].question, difficulty: data[i].difficulty, solution: data[i].solution, correct, options: shuffle(options) });
         }
         setQuestions(generated);
     }
