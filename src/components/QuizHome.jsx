@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Instructions from './Instructions';
 import Quiz from './Quiz';
 import Result from './Result';
+import toast from 'react-hot-toast';
 
 const BASE_URL = 'https://question-service-82ea.onrender.com/questions';
 
@@ -26,27 +27,27 @@ export default function QuizHome() {
         const medium = parseInt(question.numberOfMedium);
         const hard = parseInt(question.numberOfHard);
         if (isNaN(easy) || isNaN(medium) || isNaN(hard)) {
-            alert('Please enter valid numbers for the number of questions');
+            toast.error('Please enter valid numbers for the number of questions');
             return
         }
 
         if (easy < 0 || medium < 0 || hard < 0) {
-            alert('Number of questions cannot be negative');
+            toast.error('Number of questions cannot be negative');
             return;
         }
         if (question.category.trim() === '') {
-            alert('Please select a topic');
+            toast.error('Please select a topic');
             return;
         }
         if (easy + medium + hard !== 30) {
-            alert('Please make sure total number of questions is 30');
+            toast.error('Please make sure total number of questions is 30');
             return;
         }
         e.preventDefault();
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
-            alert('Oops, server is booting up...Please try after 60 seconds.');
+            toast.error('Oops, server is booting up...Please try after 60 seconds.');
             return;
         }, 3000);
         try {
@@ -61,15 +62,15 @@ export default function QuizHome() {
             clearTimeout(timeoutId);
             const data = await response.json();
             if (response.status === 500) {
-                alert(data.error);
+                toast.error("Server error. Please try again later.");
                 return;
             }
             if (response.status === 200) {
                 if (data.data.length === 0) {
-                    alert('No questions available for the selected topic and difficulty levels at the moment. Please try again later.');
+                    toast.error('No questions available for the selected topic and difficulty levels at the moment. Please try again later.');
                 }
                 else if (data.data.length < 30) {
-                    confirm('Not enough questions available for the selected topic and difficulty levels at the momemt. Would you like to continue with the available questions?') ? setupQuiz(data.data) : navigate('/QuizHome');
+                    handleInsufficientQuestion(data);
                 }
                 else {
                     setupQuiz(data.data);
@@ -112,6 +113,47 @@ export default function QuizHome() {
     const handleHome = () => {
         navigate('/');
     }
+
+    const handleInsufficientQuestion = (data) => {
+        toast.custom(
+            <div className="bg-white p-6 rounded-lg shadow-xl border max-w-md">
+                <div className="flex items-start space-x-3 mb-4">
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                        <h3 className="font-semibold text-gray-900">Limited Questions Available</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                            Not enough questions available for the selected topic and difficulty levels.
+                            Would you like to continue with the available questions?
+                        </p>
+                    </div>
+                </div>
+                <div className="flex space-x-3 justify-end">
+                    <button
+                        onClick={() => {
+                            toast.dismiss();
+                            navigate('/QuizHome');
+                        }}
+                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                    >
+                        Go Back
+                    </button>
+                    <button
+                        onClick={() => {
+                            toast.dismiss();
+                            setupQuiz(data.data);
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                        Continue Quiz
+                    </button>
+                </div>
+            </div>,
+            {
+                duration: Infinity,
+                position: 'top-center'
+            }
+        );
+    };
 
     if (questions.length === 0) {
         return (
@@ -281,11 +323,10 @@ export default function QuizHome() {
                                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700 font-medium">Total Questions:</span>
-                                            <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${
-                                                (parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0) === 30
-                                                    ? 'text-green-600 bg-green-100'
-                                                    : 'text-red-600 bg-red-100'
-                                            }`}>
+                                            <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${(parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0) === 30
+                                                ? 'text-green-600 bg-green-100'
+                                                : 'text-red-600 bg-red-100'
+                                                }`}>
                                                 {(parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0)} / 30
                                             </div>
                                         </div>

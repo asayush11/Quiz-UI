@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 const BASE_URL = 'https://question-service-82ea.onrender.com/questions';
@@ -17,7 +18,7 @@ export default function Question({ loggedIn }) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-      alert('Oops, server is booting up...Please try after 60 seconds.');
+      toast.error('Oops, server is booting up...Please try after 60 seconds.');
       return;
     }, 5000);
     try {
@@ -33,15 +34,15 @@ export default function Question({ loggedIn }) {
       clearTimeout(timeoutId);
       const data = await response.json();
       if (response.status === 400) {
-        alert(data.message);
+        toast.error(data.message);
         return;
       }
       if (response.status === 500) {
-        alert(data.error);
+        toast.error(data.error);
         return;
       }
       if (response.status === 201) {
-        alert(data.message);
+        toast.success(data.message);
         setQuestion({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
         return;
       }

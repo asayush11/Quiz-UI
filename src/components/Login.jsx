@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Question from './Question';
+import toast from 'react-hot-toast';
 
 const BASE_URL = 'https://question-service-82ea.onrender.com';
 
@@ -14,13 +15,13 @@ export default function Login() {
 
   const handleSubmit = async () => {
     if (password.trim() === '') {
-      alert('Please enter a password');
+      toast.error('Please enter a password');
       return;
     }
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-      alert('Oops, server is booting up...Please try after 60 seconds.');
+      toast.error('Oops, server is booting up...Please try after 60 seconds.');
       return;
     }, 3000);
     try {
@@ -31,8 +32,7 @@ export default function Login() {
       let data = await response.json();
       clearTimeout(timeoutId);
       if (response.status !== 200) {
-        alert(data.message);
-        console.log(data.error);
+        toast.error("Invalid password. Please try again.");
         return;
       }
       setLoggedIn(true);
@@ -47,6 +47,7 @@ export default function Login() {
 
   if (loggedIn) {
     return (
+      toast.success('Login successful!'),
       <Question loggedIn={loggedIn} />
     );
   }
