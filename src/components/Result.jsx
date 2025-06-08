@@ -11,7 +11,7 @@ export default function Result({ score, answers }) {
   // Calculate percentage and performance metrics
   const totalQuestions = answers.length;
   const correctAnswers = answers.filter(ans => ans.isCorrect).length;
-  const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+  const percentage = Math.round((score / totalQuestions) * 100);
 
   // Performance level based on percentage
   const getPerformanceLevel = () => {
