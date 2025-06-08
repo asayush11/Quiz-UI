@@ -47,7 +47,7 @@ export default function Result({ score, answers }) {
                 <div className="text-sm text-gray-600">Correct</div>
               </div>
               <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-4 border border-red-100">
-                <div className="text-2xl font-bold text-red-600">{totalQuestions - correctAnswers}</div>
+                <div className="text-2xl font-bold text-red-600">{ (correctAnswers - score)*2 }</div>
                 <div className="text-sm text-gray-600">Incorrect</div>
               </div>
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
