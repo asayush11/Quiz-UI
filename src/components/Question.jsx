@@ -6,6 +6,7 @@ const BASE_URL = 'https://question-service-82ea.onrender.com/questions';
 
 export default function Question({ loggedIn }) {
   const navigate = useNavigate();
+  const [disableSubmit, setDisableSubmit] = useState(false);
 
   const handleHome = () => {
     navigate('/');
@@ -14,11 +15,13 @@ export default function Question({ loggedIn }) {
   const [question, setQuestion] = useState({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
 
   const handleSubmit = async (e) => {
+    setDisableSubmit(true);
     e.preventDefault();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
       toast.error('Oops, server is booting up...Please try after 60 seconds.');
+      setDisableSubmit(false);
       return;
     }, 5000);
     try {
@@ -33,6 +36,7 @@ export default function Question({ loggedIn }) {
       });
       clearTimeout(timeoutId);
       const data = await response.json();
+      setDisableSubmit(false);
       if (response.status === 400) {
         toast.error(data.message);
         return;
@@ -48,6 +52,8 @@ export default function Question({ loggedIn }) {
       }
     } catch (err) {
       console.log(err.message);
+      setDisableSubmit(false);
+      toast.error('An error occurred while submitting the question. Please try again later.');
     }
   };
 
@@ -271,6 +277,7 @@ export default function Question({ loggedIn }) {
                   type="submit"
                   onClick={handleSubmit}
                   disabled={
+                    disableSubmit ||
                     question.category.length < 1 ||
                     question.question.length <= 0 ||
                     question.option1.length < 1 ||
