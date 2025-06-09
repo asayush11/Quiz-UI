@@ -16,13 +16,12 @@ export default function App() {
       position="top-right"
       reverseOrder={false}
       toastOptions={{
-        className: 'bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl shadow-2xl',
+        duration: 2000,
         style: {
-          fontSize: '1rem',
-          color: '#333',
+          background: '#363636',
+          color: '#fff',
         },
-      }}
-    />
+      }} />
     </div>
   );
 }
