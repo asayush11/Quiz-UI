@@ -67,7 +67,7 @@ export default function QuizHome() {
             }
             if (response.status === 200) {
                 if (data.data.length === 0) {
-                    toast.error('No questions available for the selected topic and difficulty levels at the moment. Please try again later.');
+                    toast.error('We are adding questions....Please stay tuned!');
                 }
                 else if (data.data.length < 30) {
                     handleInsufficientQuestion(data);
@@ -78,7 +78,7 @@ export default function QuizHome() {
                 return;
             }
         } catch (err) {
-            console.log(err.message);
+            console.log('Network error. Please try again later.');
             return;
         }
     }
@@ -122,7 +122,7 @@ export default function QuizHome() {
                     <div>
                         <h3 className="font-semibold text-gray-900">Limited Questions Available</h3>
                         <p className="text-sm text-gray-600 mt-1">
-                            Not enough questions available for the selected topic and difficulty levels.
+                            Not enough questions available at the moment.
                             Would you like to continue with the available questions?
                         </p>
                     </div>

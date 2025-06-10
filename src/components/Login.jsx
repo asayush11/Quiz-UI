@@ -37,7 +37,7 @@ export default function Login() {
       }
       setLoggedIn(true);
     } catch (err) {
-      console.log(err.message);
+      console.log('Network error. Please try again later.');
     }
   };
 

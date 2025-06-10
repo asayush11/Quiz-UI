@@ -51,7 +51,7 @@ export default function Question({ loggedIn }) {
         return;
       }
     } catch (err) {
-      console.log(err.message);
+      console.log('Network error. Please try again later.');
       setDisableSubmit(false);
       toast.error('An error occurred while submitting the question. Please try again later.');
     }
