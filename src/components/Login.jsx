@@ -21,7 +21,7 @@ export default function Login() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-      toast.error('Oops, server is booting up...Please try after 60 seconds.');
+      toast.error('Network error. Please try again.');
       return;
     }, 3000);
     try {

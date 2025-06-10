@@ -47,7 +47,7 @@ export default function QuizHome() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
-            toast.error('Oops, server is booting up...Please try after 60 seconds.');
+            toast.error('Network error. Please try again.');
             return;
         }, 3000);
         try {
@@ -62,7 +62,7 @@ export default function QuizHome() {
             clearTimeout(timeoutId);
             const data = await response.json();
             if (response.status === 500) {
-                toast.error("Server error. Please try again later.");
+                toast.error("Server error. Please try again.");
                 return;
             }
             if (response.status === 200) {

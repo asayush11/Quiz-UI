@@ -20,7 +20,7 @@ export default function Question({ loggedIn }) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-      toast.error('Oops, server is booting up...Please try after 60 seconds.');
+      toast.error('Network error. Please try again.');
       setDisableSubmit(false);
       return;
     }, 5000);
@@ -53,7 +53,7 @@ export default function Question({ loggedIn }) {
     } catch (err) {
       console.log('Network error. Please try again later.');
       setDisableSubmit(false);
-      toast.error('An error occurred while submitting the question. Please try again later.');
+      toast.error('An error occurred while submitting the question. Please try again.');
     }
   };
 
