@@ -43,7 +43,7 @@ export default function QuizHome() {
             toast.error('Please make sure total number of questions is 30');
             return;
         }
-        e.preventDefault();
+       // e.preventDefault();
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
@@ -336,6 +336,7 @@ export default function QuizHome() {
                                 {/* Submit Button */}
                                 <div className="pt-6 border-t border-gray-100">
                                     <button
+                                        type="button" 
                                         onClick={handleSubmit}
                                         className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                                     >
