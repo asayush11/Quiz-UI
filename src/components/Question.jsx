@@ -20,7 +20,7 @@ export default function Question({ loggedIn }) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-      toast.error('Thank you for your contribution! Your question will be reviewed shortly.');
+      toast.success('Thank you for your contribution! Your question will be reviewed shortly.');
       setDisableSubmit(false);
       return;
     }, 5000);
