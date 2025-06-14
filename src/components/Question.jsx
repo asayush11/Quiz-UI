@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
-export default function Question({ loggedIn, setLoggedIn }) {
+export default function Question({ loggedIn, setLoggedIn, setEmail, setPassword }) {
   const navigate = useNavigate();
   const [disableSubmit, setDisableSubmit] = useState(false);
 
@@ -41,6 +41,8 @@ export default function Question({ loggedIn, setLoggedIn }) {
       if (response.status === 401) {
         toast.error(data.message);
         setLoggedIn(false);
+        setPassword("");
+        setEmail("");
         navigate('/login');
         return;
       }

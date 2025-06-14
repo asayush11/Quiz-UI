@@ -62,7 +62,7 @@ export default function Login() {
   if (loggedIn) {
     return (
       toast.success('Login successful!'),
-      <Question loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>
+      <Question loggedIn={loggedIn} setLoggedIn={setLoggedIn} setEmail={setEmail} setPassword={setPassword}/>
     );
   }
 
