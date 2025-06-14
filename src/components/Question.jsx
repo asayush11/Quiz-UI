@@ -2,7 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-const BASE_URL = 'https://question-service-82ea.onrender.com/questions';
+const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
 export default function Question({ loggedIn }) {
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ export default function Question({ loggedIn }) {
     try {
       const response = await fetch(`${BASE_URL}/create`, {
         method: 'POST',
+        credentials: 'include',
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
@@ -37,6 +38,11 @@ export default function Question({ loggedIn }) {
       clearTimeout(timeoutId);
       const data = await response.json();
       setDisableSubmit(false);
+      if (response.status === 401) {
+        toast.error(data.message);
+        navigate('/login');
+        return;
+      }
       if (response.status === 400) {
         toast.error(data.message);
         return;

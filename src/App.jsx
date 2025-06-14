@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
+import SignUP from './components/SignUP';
 import QuizHome from './components/QuizHome';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -10,6 +11,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/SignUp" element={<SignUP />} />
       <Route path="/quizHome" element={<QuizHome />} />
     </Routes>
     <Toaster

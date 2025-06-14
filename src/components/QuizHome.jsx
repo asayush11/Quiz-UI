@@ -6,7 +6,7 @@ import Quiz from './Quiz';
 import Result from './Result';
 import toast from 'react-hot-toast';
 
-const BASE_URL = 'https://question-service-82ea.onrender.com/questions';
+const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
 export default function QuizHome() {
 
