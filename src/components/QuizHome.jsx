@@ -6,7 +6,7 @@ import Quiz from './Quiz';
 import Result from './Result';
 import toast from 'react-hot-toast';
 
-const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
+const BASE_URL = `https://question-service-82ea.onrender.com` + '/questions';
 
 export default function QuizHome() {
 
@@ -43,7 +43,7 @@ export default function QuizHome() {
             toast.error('Please make sure total number of questions is 30');
             return;
         }
-       // e.preventDefault();
+        // e.preventDefault();
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
@@ -57,12 +57,23 @@ export default function QuizHome() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
+                }
+            }).then(async res => {
+                const newToken = res.headers.get("X-New-Access-Token");
+                if (newToken) {
+                    sessionStorage.setItem('token', newToken);
                 }
             });
             clearTimeout(timeoutId);
             const data = await response.json();
             if (response.status === 500) {
                 toast.error("Server error. Please try again.");
+                return;
+            }
+            if (response.status === 401) {
+                toast.error(data.message);
+                navigate('/logout');
                 return;
             }
             if (response.status === 200) {
@@ -154,6 +165,13 @@ export default function QuizHome() {
             }
         );
     };
+
+    if (!sessionStorage.getItem('token')) {
+        return (
+            toast.error('Please login to access this page.'),
+            navigate('/login')
+        );
+    }
 
     if (questions.length === 0) {
         return (
@@ -336,7 +354,7 @@ export default function QuizHome() {
                                 {/* Submit Button */}
                                 <div className="pt-6 border-t border-gray-100">
                                     <button
-                                        type="button" 
+                                        type="button"
                                         onClick={handleSubmit}
                                         className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                                     >

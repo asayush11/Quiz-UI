@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Question from './Question';
 import toast from 'react-hot-toast';
+import UserHome from './UserHome';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/users';
 
@@ -28,7 +29,7 @@ export default function Login() {
       controller.abort();
       toast.error('Network error. Please try again.');
       return;
-    }, 3000);
+    }, 4000);
     try {
       const response = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
@@ -45,6 +46,7 @@ export default function Login() {
         toast.error("Invalid credentials. Please try again.");
         return;
       }
+      sessionStorage.setItem('token', data.data);
       setLoggedIn(true);
     } catch (err) {
       console.log('Network error. Please try again later.');
@@ -62,7 +64,7 @@ export default function Login() {
   if (loggedIn) {
     return (
       toast.success('Login successful!'),
-      <Question loggedIn={loggedIn} setLoggedIn={setLoggedIn} setEmail={setEmail} setPassword={setPassword}/>
+      <UserHome />
     );
   }
 

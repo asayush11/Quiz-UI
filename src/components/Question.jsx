@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import UserHome from './UserHome';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
-export default function Question({ loggedIn, setLoggedIn, setEmail, setPassword }) {
+export default function Question() {
   const navigate = useNavigate();
   const [disableSubmit, setDisableSubmit] = useState(false);
 
   const handleHome = () => {
-    navigate('/');
+    return <UserHome />;
+  };
+
+
+  const handleLogout = () => {
+    navigate('/logout');
   };
 
   const [question, setQuestion] = useState({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
@@ -32,18 +38,21 @@ export default function Question({ loggedIn, setLoggedIn, setEmail, setPassword 
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
         },
         body: JSON.stringify({ category: question.category, question: question.question, option1: question.option1, option2: question.option2, option3: question.option3, option4: question.option4, difficulty: question.difficulty, solution: question.solution })
+      }).then(async res => {
+        const newToken = res.headers.get("X-New-Access-Token");
+        if (newToken) {
+          sessionStorage.setItem('token', newToken);
+        }
       });
       clearTimeout(timeoutId);
       const data = await response.json();
       setDisableSubmit(false);
       if (response.status === 401) {
         toast.error(data.message);
-        setLoggedIn(false);
-        setPassword("");
-        setEmail("");
-        navigate('/login');
+        navigate('/logout');
         return;
       }
       if (response.status === 400) {
@@ -69,9 +78,11 @@ export default function Question({ loggedIn, setLoggedIn, setEmail, setPassword 
     setQuestion({ ...question, [e.target.name]: e.target.value })
   }
 
-  if (!loggedIn) {
-    navigate('/login');
-    return null; // Prevent rendering if not logged in
+  if (!sessionStorage.getItem('token')) {
+    return (
+      toast.error('Please login to create a question.'),
+      navigate('/login')
+    );
   }
 
   return (
@@ -95,6 +106,15 @@ export default function Question({ loggedIn, setLoggedIn, setEmail, setPassword 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Home
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-2.5 rounded-xl font-medium border border-gray-200 transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Log Out
           </button>
         </div>
       </div>
