@@ -5,17 +5,14 @@ import UserHome from './UserHome';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
-export default function Question({user}) {
+export default function Question() {
   const navigate = useNavigate();
   const [disableSubmit, setDisableSubmit] = useState(false);
 
   const handleHome = () => {
     navigate('/user');
   };
-
-
   
-
   const [question, setQuestion] = useState({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
 
   const handleSubmit = async (e) => {
@@ -40,13 +37,12 @@ export default function Question({user}) {
           'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
         },
         body: JSON.stringify({ category: question.category, question: question.question, option1: question.option1, option2: question.option2, option3: question.option3, option4: question.option4, difficulty: question.difficulty, solution: question.solution })
-      }).then(async res => {
-        const newToken = res.headers.get("X-New-Access-Token");
-        if (newToken) {
-          sessionStorage.setItem('token', newToken);
-        }
       });
       clearTimeout(timeoutId);
+      const newToken = response.headers.get("X-New-Access-Token");
+      if (newToken) {
+        sessionStorage.setItem('token', newToken);
+      }
       const data = await response.json();
       setDisableSubmit(false);
       if (response.status === 401) {
@@ -105,7 +101,7 @@ export default function Question({user}) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Home
-          </button>          
+          </button>
         </div>
       </div>
 

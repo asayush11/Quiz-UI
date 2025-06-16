@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
-export default function QuizHome({user}) {
+export default function QuizHome() {
 
     const navigate = useNavigate();
     const [score, setScore] = useState(0);
@@ -44,9 +44,9 @@ export default function QuizHome({user}) {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
-            toast.error('Network error. Please try again.');
+            toast.error('Request Timed Out. Please try again.');
             return;
-        }, 3000);
+        }, 5000);
         try {
             const response = await fetch(`${BASE_URL}/retrieve?category=${question.category}` + `&numberOfEasy=${easy}` + `&numberOfMedium=${medium}` + `&numberOfDifficult=${hard}`, {
                 method: 'GET',
@@ -56,13 +56,13 @@ export default function QuizHome({user}) {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
                 }
-            }).then(async res => {
-                const newToken = res.headers.get("X-New-Access-Token");
-                if (newToken) {
-                    sessionStorage.setItem('token', newToken);
-                }
             });
             clearTimeout(timeoutId);
+            const newToken = response.headers.get("X-New-Access-Token");
+            if (newToken) {
+                sessionStorage.setItem('token', newToken);
+            }
+
             const data = await response.json();
             if (response.status === 500 || response.status === 503) {
                 toast.error("Server error. Please try again.");
@@ -73,7 +73,7 @@ export default function QuizHome({user}) {
                 navigate('/logout');
                 return;
             }
-            if(response.status === 400) {
+            if (response.status === 400) {
                 toast.error(data.message);
                 return;
             }
@@ -144,7 +144,6 @@ export default function QuizHome({user}) {
                     <button
                         onClick={() => {
                             toast.dismiss();
-                            navigate('/QuizHome');
                         }}
                         className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                     >
@@ -173,7 +172,7 @@ export default function QuizHome({user}) {
             toast.error('Please login to access this page.'),
             window.location.href = '/login'
         );
-    } 
+    }
 
 
     if (questions.length === 0) {
