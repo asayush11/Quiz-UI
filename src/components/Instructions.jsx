@@ -1,11 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
-import { useState } from 'react';
 
 export default function Instructions() {
   const navigate = useNavigate();
-  const [stay, setStay] = useState(true);
   const { startQuiz, questions } = useOutletContext();
   const numQuestions = questions.length;
 
@@ -19,118 +17,198 @@ export default function Instructions() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
-        {/* Main Card */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white">
-            <h2 className="text-5xl font-bold mb-2 tracking-tight">Quiz Instructions</h2>
-            <div className="flex items-center gap-2 text-indigo-100">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span className="text-lg font-medium">Get ready to test your knowledge!</span>
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-rose-50 to-orange-50">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-md border-b border-white/30 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-violet-600 to-rose-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">📋</span>
+              </div>
+              <div>
+                <h2 className="font-bold text-xl text-gray-800">Quiz Instructions</h2>
+                <p className="text-xs text-gray-600">Read carefully before starting</p>
+              </div>
+            </div>
+            <button 
+              onClick={goHome} 
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-200 transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Background Elements */}
+      <div className="absolute top-32 left-16 w-80 h-80 bg-gradient-to-r from-violet-300/20 to-rose-300/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-r from-rose-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-32 left-1/4 w-72 h-72 bg-gradient-to-r from-orange-300/20 to-violet-300/20 rounded-full blur-3xl"></div>
+
+      {/* Main Content */}
+      <div className="relative max-w-6xl mx-auto px-6 py-12">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-rose-600 to-orange-600 mb-6">
+            Quiz Instructions
+          </h1>
+          <div className="w-32 h-1.5 bg-gradient-to-r from-violet-500 to-rose-500 mx-auto rounded-full mb-6"></div>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Get ready to challenge yourself! Here's everything you need to know before starting your quiz journey.
+          </p>
+        </div>
+
+        {/* Quiz Overview Card */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/50 mb-8">
+          <div className="bg-gradient-to-r from-violet-600 to-rose-600 rounded-2xl p-6 text-white mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">Quiz Overview</h2>
+                <p className="text-violet-100">What to expect in this quiz</p>
+              </div>
+              <div className="text-6xl opacity-20">🎯</div>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-8 space-y-6">
-            {/* Quiz Overview */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                Quiz Overview
-              </h3>
-              <p className="text-gray-700 text-lg">
-                You will answer <span className="font-bold text-indigo-600">{numQuestions} questions</span> with a 45-second timer for each question.
-              </p>
-            </div>
-
-            {/* Rules Grid */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">+1</span>
-                  </div>
-                  <span className="font-semibold text-gray-800">Correct Answer</span>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4 p-4 bg-violet-50 rounded-2xl">
+                <div className="w-12 h-12 bg-violet-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold">{numQuestions}</span>
                 </div>
-                <p className="text-gray-600">Earn 1 point for each correct response</p>
+                <div>
+                  <h3 className="font-semibold text-gray-800">Total Questions</h3>
+                  <p className="text-gray-600">Multiple choice format</p>
+                </div>
               </div>
 
-              <div className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-5 border border-red-100">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">-0.5</span>
-                  </div>
-                  <span className="font-semibold text-gray-800">Wrong Answer</span>
+              <div className="flex items-center space-x-4 p-4 bg-rose-50 rounded-2xl">
+                <div className="w-12 h-12 bg-rose-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold">45s</span>
                 </div>
-                <p className="text-gray-600">Lose 0.5 points for incorrect responses</p>
+                <div>
+                  <h3 className="font-semibold text-gray-800">Timer per Question</h3>
+                  <p className="text-gray-600">Think fast and answer wisely</p>
+                </div>
               </div>
             </div>
 
-            {/* Important Notes */}
-            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-6 border border-amber-200">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                Important Guidelines
-              </h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Each question offers 4 multiple-choice answers</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>No internet connection required once quiz begins</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Use "Next" to proceed, "Clear" to deselect options</span>
-                </li>
-                <li className="flex items-start gap-3 text-gray-700">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Questions cannot be revisited once submitted</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Warning */}
-            <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border border-red-200">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-xs">!</span>
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4 p-4 bg-green-50 rounded-2xl">
+                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold">+1</span>
                 </div>
-                <p className="text-red-700 font-medium">
-                  Avoid refreshing the page during the quiz to prevent data loss
-                </p>
+                <div>
+                  <h3 className="font-semibold text-gray-800">Correct Answer</h3>
+                  <p className="text-gray-600">Points added to your score</p>
+                </div>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <button 
-                onClick={startQuiz} 
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-indigo-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  Start Quiz
-                  <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                </span>
-              </button>
-              
-              <button 
-                onClick={goHome} 
-                className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transform hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                Back to Home
-              </button>
+              <div className="flex items-center space-x-4 p-4 bg-red-50 rounded-2xl">
+                <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold">-0.5</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800">Wrong Answer</h3>
+                  <p className="text-gray-600">Points deducted from score</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-10 right-10 w-32 h-32 bg-gradient-to-br from-pink-400 to-rose-400 rounded-full opacity-10 animate-pulse delay-1000"></div>
+        {/* Rules and Guidelines */}
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          {/* Important Guidelines */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center">
+                <span className="text-2xl">📝</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800">Quiz Guidelines</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {[
+                "Each question offers 4 multiple-choice answers",
+                "No internet connection required once quiz begins",
+                "Use 'Next' to proceed, 'Clear' to deselect options",
+                "Questions cannot be revisited once submitted"
+              ].map((guideline, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-white font-bold text-xs">{index + 1}</span>
+                  </div>
+                  <p className="text-gray-700">{guideline}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tips for Success */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/50">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                <span className="text-2xl">💡</span>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800">Success Tips</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {[
+                "Read each question carefully before answering",
+                "Manage your time effectively - don't overthink",
+                "Trust your first instinct if unsure",
+                "Stay calm and focused throughout the quiz"
+              ].map((tip, index) => (
+                <div key={index} className="flex items-start space-x-3">
+                  <div className="w-6 h-6 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-white font-bold text-xs">✓</span>
+                  </div>
+                  <p className="text-gray-700">{tip}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Warning Banner */}
+        <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-2xl p-6 mb-8 text-white shadow-xl">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-xl mb-1">Important Warning</h3>
+              <p className="text-red-100">Avoid refreshing the page during the quiz to prevent data loss. Once you start, complete the entire quiz in one session.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Start Quiz CTA */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-white/50 text-center">
+          <div className="mb-8">
+            <h3 className="text-3xl font-bold text-gray-800 mb-4">Ready to Begin?</h3>
+            <p className="text-xl text-gray-600">Click the button below to start your quiz adventure!</p>
+          </div>
+          
+          <button 
+            onClick={startQuiz} 
+            className="inline-flex items-center px-12 py-5 bg-gradient-to-r from-violet-600 to-rose-600 hover:from-violet-700 hover:to-rose-700 text-white font-bold text-xl rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300"
+          >
+            <span className="mr-3">🚀</span>
+            Start Quiz Now
+            <span className="ml-3 w-2 h-2 bg-white rounded-full animate-bounce"></span>
+          </button>
+          
+          <p className="text-gray-500 text-sm mt-4">
+            Best of luck! Show us what you know.
+          </p>
+        </div>
       </div>
     </div>
   );
