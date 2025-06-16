@@ -1,9 +1,8 @@
 import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Question from './Question';
 import toast from 'react-hot-toast';
-import UserHome from './UserHome';
+import { useEffect } from 'react';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/users';
 
@@ -12,7 +11,6 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async () => {
@@ -42,12 +40,17 @@ export default function Login() {
       });
       let data = await response.json();
       clearTimeout(timeoutId);
-      if (response.status !== 200) {
+      if(response.status === 500 || response.status === 503) {
+        toast.error("Server error. Please try again later."); 
+      }
+      if (response.status === 401 || response.status === 400 || response.status === 403) {
         toast.error("Invalid credentials. Please try again.");
         return;
       }
-      sessionStorage.setItem('token', data.data);
-      setLoggedIn(true);
+      sessionStorage.setItem('token', data.data.token);
+      sessionStorage.setItem('user', data.data.username);
+      toast.success('Login successful!');
+      handleUserHome();
     } catch (err) {
       console.log('Network error. Please try again later.');
     }
@@ -61,14 +64,13 @@ export default function Login() {
     navigate('/SignUP');
   }
 
-  if (loggedIn) {
-    return (
-      toast.success('Login successful!'),
-      <UserHome />
-    );
+  const handleUserHome = () => {
+    if (sessionStorage.getItem('token')) {
+      navigate('/user');
+    }
   }
 
-  else return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="bg-white/80 backdrop-blur-sm border border-white/20 rounded-2xl shadow-2xl p-8 space-y-6">

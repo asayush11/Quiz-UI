@@ -1,11 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
+import { useState } from 'react';
 
-export default function Result({ score, answers }) {
+export default function Result() {
   const navigate = useNavigate();
+  const { score, answers } = useOutletContext();
 
   const goHome = () => {
-    navigate('/');
+        if(sessionStorage.getItem('token') === null) {
+            window.location.href = '/';
+            return null;
+        }
+        navigate('/user');
+        return null;
   };
 
   // Calculate percentage and performance metrics

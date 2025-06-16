@@ -50,7 +50,11 @@ export default function SignUP() {
       });
       let data = await response.json();
       clearTimeout(timeoutId);
-      if (response.status !== 201) {
+      if(response.status === 500 || response.status === 503) {
+        toast.error("Server error. Please try again later.");
+        return;
+      }
+      if (response.status === 400) {
         toast.error(data.error || "An error occurred. Please try again.");
         return;
       }

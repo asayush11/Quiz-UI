@@ -15,6 +15,7 @@ export default function Logout() {
         },
       });
       sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       toast.success('You have been logged out successfully.');
       window.location.href = '/';
     } catch (err) {

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 
-export default function Quiz({ questions, finishQuiz }) {
+export default function Quiz() {
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [answerList, setAnswerList] = useState([]);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(45);
+  const { questions, finishQuiz } = useOutletContext();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -63,7 +65,12 @@ export default function Quiz({ questions, finishQuiz }) {
   };
 
   const goHome = () => {
-    navigate('/');
+        if(sessionStorage.getItem('token') === null) {
+            window.location.href = '/';
+            return null;
+        }
+        navigate('/user');
+        return null;
   };
 
   const q = questions[current];

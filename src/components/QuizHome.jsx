@@ -1,17 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import Instructions from './Instructions';
-import Quiz from './Quiz';
-import Result from './Result';
 import toast from 'react-hot-toast';
+import { Outlet } from 'react-router-dom';
 
-const BASE_URL = `https://question-service-82ea.onrender.com` + '/questions';
+const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
-export default function QuizHome() {
+export default function QuizHome({user}) {
 
     const navigate = useNavigate();
-    const [screen, setScreen] = useState('instructions');
     const [score, setScore] = useState(0);
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState([]);
@@ -67,7 +64,7 @@ export default function QuizHome() {
             });
             clearTimeout(timeoutId);
             const data = await response.json();
-            if (response.status === 500) {
+            if (response.status === 500 || response.status === 503) {
                 toast.error("Server error. Please try again.");
                 return;
             }
@@ -97,7 +94,7 @@ export default function QuizHome() {
     const startQuiz = () => {
         setAnswers([]);
         setScore(0);
-        setScreen('quiz');
+        navigate('quiz');
     }
 
     const setupQuiz = (data) => {
@@ -111,6 +108,7 @@ export default function QuizHome() {
             generated.push({ question: data[i].question, difficulty: data[i].difficulty, solution: data[i].solution, correct, options: shuffle(options) });
         }
         setQuestions(generated);
+        navigate('instructions');
     }
 
     const shuffle = (array) => array.sort(() => 0.5 - Math.random());
@@ -118,11 +116,11 @@ export default function QuizHome() {
     const finishQuiz = (finalScore, answerList) => {
         setScore(finalScore);
         setAnswers(answerList);
-        setScreen('result');
+        navigate('result');
     };
 
     const handleHome = () => {
-        navigate('/');
+        navigate('/user');
     }
 
     const handleInsufficientQuestion = (data) => {
@@ -169,9 +167,10 @@ export default function QuizHome() {
     if (!sessionStorage.getItem('token')) {
         return (
             toast.error('Please login to access this page.'),
-            navigate('/login')
+            window.location.href = '/login'
         );
-    }
+    } 
+
 
     if (questions.length === 0) {
         return (
@@ -374,9 +373,7 @@ export default function QuizHome() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            {screen === 'instructions' && <Instructions startQuiz={startQuiz} numQuestions={questions.length} />}
-            {screen === 'quiz' && <Quiz questions={questions} finishQuiz={finishQuiz} />}
-            {screen === 'result' && <Result score={score} answers={answers} />}
+            <Outlet context={{ questions, answers, score, startQuiz, finishQuiz }} />
         </div>
     );
 }

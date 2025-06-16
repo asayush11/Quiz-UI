@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
   sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
   
   const navigate = useNavigate();
 

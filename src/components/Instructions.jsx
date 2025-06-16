@@ -1,12 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
+import { useState } from 'react';
 
-export default function Instructions({ startQuiz, numQuestions }) {
+export default function Instructions() {
   const navigate = useNavigate();
-  
+  const [stay, setStay] = useState(true);
+  const { startQuiz, questions } = useOutletContext();
+  const numQuestions = questions.length;
+
   const goHome = () => {
-        navigate('/');
-    };
+        if(sessionStorage.getItem('token') === null) {
+            window.location.href = '/';
+            return null;
+        }
+        navigate('/user');
+        return null;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">

@@ -1,22 +1,21 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import UserHome from './UserHome';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
-export default function Question() {
+export default function Question({user}) {
   const navigate = useNavigate();
   const [disableSubmit, setDisableSubmit] = useState(false);
 
   const handleHome = () => {
-    return <UserHome />;
+    navigate('/user');
+    return <Outlet />
   };
 
 
-  const handleLogout = () => {
-    navigate('/logout');
-  };
+  
 
   const [question, setQuestion] = useState({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
 
@@ -59,8 +58,8 @@ export default function Question() {
         toast.error(data.message);
         return;
       }
-      if (response.status === 500) {
-        toast.error(data.error);
+      if (response.status === 500 || response.status === 503) {
+        toast.error("Server error. Please try again later.");
         return;
       }
       if (response.status === 201) {
@@ -81,7 +80,7 @@ export default function Question() {
   if (!sessionStorage.getItem('token')) {
     return (
       toast.error('Please login to create a question.'),
-      navigate('/login')
+      window.location.href = '/login'
     );
   }
 
@@ -106,16 +105,7 @@ export default function Question() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
             Home
-          </button>
-          <button
-            onClick={handleLogout}
-            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-2.5 rounded-xl font-medium border border-gray-200 transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          >
-            <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Log Out
-          </button>
+          </button>          
         </div>
       </div>
 
