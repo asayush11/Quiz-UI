@@ -11,7 +11,6 @@ export default function Question({user}) {
 
   const handleHome = () => {
     navigate('/user');
-    return <Outlet />
   };
 
 
@@ -26,6 +25,7 @@ export default function Question({user}) {
     const timeoutId = setTimeout(() => {
       controller.abort();
       toast.success('Thank you for your contribution! Your question will be reviewed shortly.');
+      setQuestion({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
       setDisableSubmit(false);
       return;
     }, 5000);

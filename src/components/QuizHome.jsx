@@ -73,6 +73,10 @@ export default function QuizHome({user}) {
                 navigate('/logout');
                 return;
             }
+            if(response.status === 400) {
+                toast.error(data.message);
+                return;
+            }
             if (response.status === 200) {
                 if (data.data.length === 0) {
                     toast.error('We are adding questions....Please stay tuned!');
