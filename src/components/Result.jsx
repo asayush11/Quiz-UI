@@ -60,41 +60,38 @@ export default function Result() {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Hero Section with Score */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="text-center space-y-8 max-w-4xl mx-auto">
+          <div className="text-center space-y-6 max-w-4xl mx-auto">
             {/* Floating Score Circle */}
             <div className="relative inline-block">
-              <div className={`w-64 h-64 rounded-full bg-gradient-to-r ${performance.color} flex items-center justify-center shadow-2xl shadow-blue-200/40 animate-pulse`}>
+              <div className={`w-49 h-49 rounded-full bg-gradient-to-r ${performance.color} flex items-center justify-center shadow-2xl shadow-blue-200/40 animate-pulse`}>
                 <div className="text-center text-white">
-                  <div className="text-7xl font-bold mb-2">{score}</div>
+                  <div className="text-5xl font-bold mb-2">{score}</div>
                   <div className="text-xl opacity-90">/ {totalQuestions}</div>
                 </div>
               </div>
               
               {/* Orbiting Performance Badge */}
               <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-gray-100 animate-bounce delay-300">
-                <div className={`text-2xl font-bold bg-gradient-to-r ${performance.color} bg-clip-text text-transparent`}>
+                <div className={`text-1xl font-bold bg-gradient-to-r ${performance.color} bg-clip-text text-transparent`}>
                   {performance.level}!
                 </div>
               </div>
               
-              {/* Orbiting Percentage Badge */}
-              <div className="absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg border border-gray-100 animate-bounce delay-700">
-                <div className="text-xl font-bold text-gray-700">{percentage}%</div>
-              </div>
+             
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-6 mt-12">
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 hover:bg-white/80 transition-all duration-300 group shadow-lg">
-                <div className="text-5xl font-bold text-green-600 mb-2 group-hover:scale-110 transition-transform duration-300">{correctAnswers}</div>
+            <div className="grid grid-cols-3 gap-6 mt-6">
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 border border-gray-200/50 hover:bg-white/80 transition-all duration-300 group shadow-lg">
+                <div className="text-3xl font-bold text-green-600 mb-2 group-hover:scale-110 transition-transform duration-300">{correctAnswers}</div>
                 <div className="text-gray-600 text-lg">Correct Answers</div>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 hover:bg-white/80 transition-all duration-300 group shadow-lg">
-                <div className="text-5xl font-bold text-red-500 mb-2 group-hover:scale-110 transition-transform duration-300">{(correctAnswers - score)*2}</div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 border border-gray-200/50 hover:bg-white/80 transition-all duration-300 group shadow-lg">
+                <div className="text-3xl font-bold text-red-500 mb-2 group-hover:scale-110 transition-transform duration-300">{(correctAnswers - score)*2}</div>
                 <div className="text-gray-600 text-lg">Incorrect Answers</div>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 hover:bg-white/80 transition-all duration-300 group shadow-lg">
-                <div className="text-5xl font-bold text-blue-600 mb-2 group-hover:scale-110 transition-transform duration-300">{percentage}%</div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-6 border border-gray-200/50 hover:bg-white/80 transition-all duration-300 group shadow-lg">
+                <div className="text-3xl font-bold text-blue-600 mb-2 group-hover:scale-110 transition-transform duration-300">{percentage}%</div>
                 <div className="text-gray-600 text-lg">Final Score</div>
               </div>
             </div>
@@ -109,7 +106,7 @@ export default function Result() {
               <p className="text-gray-600 text-xl">Review your answers and learn from detailed explanations</p>
             </div>
 
-            <div className="h-96 overflow-y-auto space-y-6">
+            <div className="h-200 overflow-y-auto space-y-4">
               {answers.map((ans, idx) => (
                 <div key={idx} className={`rounded-3xl border-2 overflow-hidden bg-white/80 backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] shadow-lg mx-auto ${
                   ans.isCorrect
@@ -117,13 +114,13 @@ export default function Result() {
                     : 'border-red-200 hover:shadow-red-100'
                 }`}>
                   {/* Question Header */}
-                  <div className={`p-6 border-b border-gray-100 ${
+                  <div className={`p-4 border-b border-gray-100 ${
                     ans.isCorrect
                       ? 'bg-green-50'
                       : 'bg-red-50'
                   }`}>
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-xl shadow-md ${
+                      <div className={`w-12 h-8 rounded-full flex items-center justify-center font-bold text-white text-xl shadow-md ${
                         ans.isCorrect ? 'bg-green-500' : 'bg-red-500'
                       }`}>
                         {ans.isCorrect ? '✓' : '✗'}
