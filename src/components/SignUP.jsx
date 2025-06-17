@@ -46,8 +46,8 @@ export default function SignUP() {
         },
         body: JSON.stringify({ username: name, email: email, password: password }),
       });
-      let data = await response.json();
       clearTimeout(timeoutId);
+      let data = await response.json();      
       if(response.status === 500 || response.status === 503) {
         toast.error("Server error. Please try again later.");
         return;
@@ -59,7 +59,7 @@ export default function SignUP() {
       navigate('/login');
       toast.success('Account created successfully! Please login to continue.');
     } catch (err) {
-      console.log('Network error. Please try again later.');
+      console.log(err);
     }
   };
 

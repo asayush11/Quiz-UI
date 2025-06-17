@@ -38,8 +38,8 @@ export default function Login() {
         },
         body: JSON.stringify({ username: "dummy", email: email, password: password }),
       });
-      let data = await response.json();
       clearTimeout(timeoutId);
+      let data = await response.json();      
       if(response.status === 500 || response.status === 503) {
         toast.error("Server error. Please try again later."); 
       }
@@ -52,7 +52,7 @@ export default function Login() {
       toast.success('Login successful!');
       handleUserHome();
     } catch (err) {
-      console.log('Network error. Please try again later.');
+      console.log(err);
     }
   };
 
