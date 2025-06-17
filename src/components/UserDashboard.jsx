@@ -106,7 +106,7 @@ export default function UserDashboard() {
 
         {/* Stats Section */}
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">Quick Stats</h3>
+          <h3 className="text-xl font-semibold text-gray-800 mb-6">Quick Stats.....Coming Soon</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-4 bg-blue-50 rounded-xl">
               <div className="text-2xl font-bold text-blue-600 mb-1">---</div>

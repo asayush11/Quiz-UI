@@ -6,6 +6,8 @@ export default function Instructions() {
   const navigate = useNavigate();
   const { startQuiz, questions } = useOutletContext();
   const numQuestions = questions.length;
+  sessionStorage.setItem('score', 0);
+  sessionStorage.setItem('answers', JSON.stringify([]));
 
   const goHome = () => {
         if(sessionStorage.getItem('token') === null) {
@@ -88,7 +90,7 @@ export default function Instructions() {
 
               <div className="flex items-center space-x-4 p-4 bg-rose-50 rounded-2xl">
                 <div className="w-12 h-12 bg-rose-500 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold">45s</span>
+                  <span className="text-white font-bold">{sessionStorage.getItem('timePerQuestion') || 45}s</span>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800">Timer per Question</h3>

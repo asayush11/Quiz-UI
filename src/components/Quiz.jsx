@@ -6,9 +6,7 @@ export default function Quiz() {
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [answerList, setAnswerList] = useState([]);
-  const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(45);
+  const [timeLeft, setTimeLeft] = useState(sessionStorage.getItem('timePerQuestion') || 45);
   const { questions, finishQuiz } = useOutletContext();
 
   useEffect(() => {
@@ -24,29 +22,34 @@ export default function Quiz() {
     return () => clearInterval(timer);
   }, [current]);
 
+  const handleRefresh = () => {
+      window.location.href = '/Sample/result';
+  }
+
   const handleNext = () => {
     const q = questions[current];
+    const score = parseFloat(sessionStorage.getItem('score')) || 0;
+    const answerList = JSON.parse(sessionStorage.getItem('answers')) || [];
     if (selected === null) {
       const newAnswerList = [...answerList, {
         ...q,
         selected,
         isCorrect: false,
       }];
-      setAnswerList(newAnswerList);
-      handleUpdate(score, newAnswerList);
+      sessionStorage.setItem('answers', JSON.stringify(newAnswerList));
+      handleUpdate();
     }
     else {
       const correct = selected === q.correct;
       const delta = correct ? 1 : -0.5;
-      const newScore = score + delta;
+      sessionStorage.setItem('score', score + delta);
       const newAnswerList = [...answerList, {
         ...q,
         selected,
         isCorrect: correct,
       }];
-      setScore(newScore);
-      setAnswerList(newAnswerList);
-      handleUpdate(newScore, newAnswerList);
+      sessionStorage.setItem('answers', JSON.stringify(newAnswerList));
+      handleUpdate();
     }
   };
 
@@ -54,11 +57,11 @@ export default function Quiz() {
     setSelected(null);
   };
 
-  const handleUpdate = (newScore, newAnswerList) => {
+  const handleUpdate = () => {
     setSelected(null);
-    setTimeLeft(45);
+    setTimeLeft(sessionStorage.getItem('timePerQuestion') || 45);
     if (current === questions.length - 1) {
-      finishQuiz(newScore, newAnswerList);
+      finishQuiz();
     } else {
       setCurrent(current + 1);
     }
@@ -80,24 +83,29 @@ export default function Quiz() {
   
   // Timer color based on time left
   const getTimerColor = () => {
-    if (timeLeft > 30) return 'text-emerald-700';
-    if (timeLeft > 15) return 'text-amber-700';
+    if (timeLeft*3 > 2*(sessionStorage.getItem('timePerQuestion') || 45)) return 'text-emerald-700';
+    if (timeLeft*3 > (sessionStorage.getItem('timePerQuestion') || 45)) return 'text-amber-700';
     return 'text-red-600';
   };
 
   const getTimerBgColor = () => {
-    if (timeLeft > 30) return 'from-emerald-400 via-teal-400 to-cyan-400';
-    if (timeLeft > 15) return 'from-amber-400 via-orange-400 to-yellow-400';
+    if (timeLeft*3 > 2*(sessionStorage.getItem('timePerQuestion') || 45)) return 'from-emerald-400 via-teal-400 to-cyan-400';
+    if (timeLeft*3 > (sessionStorage.getItem('timePerQuestion') || 45)) return 'from-amber-400 via-orange-400 to-yellow-400';
     return 'from-red-400 via-rose-400 to-pink-400';
   };
 
   const getTimerRing = () => {
-    if (timeLeft > 30) return 'ring-emerald-200 bg-emerald-50';
-    if (timeLeft > 15) return 'ring-amber-200 bg-amber-50';
+    if (timeLeft*3 > 2*(sessionStorage.getItem('timePerQuestion') || 45)) return 'ring-emerald-200 bg-emerald-50';
+    if (timeLeft*3 > (sessionStorage.getItem('timePerQuestion') || 45)) return 'ring-amber-200 bg-amber-50';
     return 'ring-red-200 bg-red-50';
   };
 
-  return (
+  if (questions.length === 0) {
+    handleRefresh();
+    return null;
+  }
+
+  else return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-4 overflow-y-auto relative">
       {/* Subtle Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

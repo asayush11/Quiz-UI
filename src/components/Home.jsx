@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom';
 export default function Home() {
   sessionStorage.removeItem('token');
   sessionStorage.removeItem('user');
-  
+  sessionStorage.removeItem('score');
+  sessionStorage.removeItem('answers');
+  sessionStorage.removeItem('timePerQuestion');
+
   const navigate = useNavigate();
 
   const handleLogin = () => {

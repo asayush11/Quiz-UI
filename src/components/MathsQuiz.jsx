@@ -3,11 +3,9 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 export default function MathsQuiz() {
   const navigate = useNavigate();
-  const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState([]);
-
   const operations = ['+', '-', '*', '/'];
+  sessionStorage.removeItem('timePerQuestion');
 
   const generateQuestions = () => {
     const generated = [];
@@ -46,19 +44,18 @@ export default function MathsQuiz() {
   const shuffle = (array) => array.sort(() => 0.5 - Math.random());
 
   const startQuiz = () => {
-    setAnswers([]);
-    setScore(0);
+    sessionStorage.setItem('score', 0);
+    sessionStorage.setItem('answers', JSON.stringify([]));
     navigate('quiz');
   };
 
-  const finishQuiz = (finalScore, answerList) => {
-    setScore(finalScore);
-    setAnswers(answerList);
+  const finishQuiz = () => {
     navigate('result');
   };
 
   useEffect(() => {
-    if (questions.length === 0) {
+    const storedAnswers = sessionStorage.getItem('answers');
+    if ((storedAnswers === null || storedAnswers.length === 0 ) && questions.length === 0) {
       const data = generateQuestions();
       setQuestions(data);
       navigate('instructions');
@@ -67,7 +64,7 @@ export default function MathsQuiz() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <Outlet context={{ questions, answers, score, startQuiz, finishQuiz }} />
+      <Outlet context={{ questions, startQuiz, finishQuiz }} />
     </div>
   );
 }

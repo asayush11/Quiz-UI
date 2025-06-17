@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { Outlet, useNavigate } from 'react-router-dom';
-import UserHome from './UserHome';
+import { useNavigate } from 'react-router-dom';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 

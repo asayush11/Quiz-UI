@@ -4,7 +4,9 @@ import { useOutletContext } from 'react-router-dom';
 
 export default function Result() {
   const navigate = useNavigate();
-  const { score, answers } = useOutletContext();
+  //const { score, answers } = useOutletContext();
+  const score = parseFloat(sessionStorage.getItem('score')) || 0;
+  const answers = JSON.parse(sessionStorage.getItem('answers')) || [];
 
   const goHome = () => {
         if(sessionStorage.getItem('token') === null) {

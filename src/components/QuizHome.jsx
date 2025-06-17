@@ -9,10 +9,8 @@ const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 export default function QuizHome() {
 
     const navigate = useNavigate();
-    const [score, setScore] = useState(0);
     const [questions, setQuestions] = useState([]);
-    const [answers, setAnswers] = useState([]);
-    const [question, setQuestion] = useState({ category: "", numberOfEasy: 0, numberOfMedium: 0, numberOfHard: 0 });
+    const [question, setQuestion] = useState({ category: "", numberOfEasy: 0, numberOfMedium: 0, numberOfHard: 0, timePerQuestion: 0 });
 
     const onChange = (e) => {
         setQuestion({ ...question, [e.target.name]: e.target.value })
@@ -36,15 +34,18 @@ export default function QuizHome() {
             toast.error('Please select a topic');
             return;
         }
-        if (easy + medium + hard !== 30) {
-            toast.error('Please make sure total number of questions is 30');
+        if (easy + medium + hard === 0) {
+            toast.error('Please ensure total number of questions is greater than 0');
+            return;
+        }        
+        if (question.timePerQuestion <= 0) {
+            toast.error('Please ensure time per question is greater than 0 in seconds');
             return;
         }
-        // e.preventDefault();
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
-            toast.error('Request Timed Out. Please try again.');
+            toast.error('Network error.Please try again.');
             return;
         }, 5000);
         try {
@@ -90,14 +91,14 @@ export default function QuizHome() {
                 return;
             }
         } catch (err) {
-            console.log('Network error. Please try again later.');
+            console.log(err);
             return;
         }
     }
 
     const startQuiz = () => {
-        setAnswers([]);
-        setScore(0);
+        sessionStorage.setItem('score', 0);
+        sessionStorage.setItem('answers', JSON.stringify([]));
         navigate('quiz');
     }
 
@@ -112,14 +113,13 @@ export default function QuizHome() {
             generated.push({ question: data[i].question, difficulty: data[i].difficulty, solution: data[i].solution, correct, options: shuffle(options) });
         }
         setQuestions(generated);
+        sessionStorage.setItem('timePerQuestion', question.timePerQuestion);
         navigate('instructions');
     }
 
     const shuffle = (array) => array.sort(() => 0.5 - Math.random());
 
-    const finishQuiz = (finalScore, answerList) => {
-        setScore(finalScore);
-        setAnswers(answerList);
+    const finishQuiz = () => {
         navigate('result');
     };
 
@@ -167,77 +167,62 @@ export default function QuizHome() {
         );
     };
 
-    if (!sessionStorage.getItem('token')) {
+    if (sessionStorage.getItem('token')) {
         return (
             toast.error('Please login to access this page.'),
             window.location.href = '/login'
         );
     }
 
-
     if (questions.length === 0) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-                {/* Header */}
-                <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-10">
-                    <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                        <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                            </div>
-                            <h1 className="text-xl font-bold text-gray-800">Quiz Setup</h1>
-                        </div>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100">
+                {/* Main Content - Full Screen */}
+                <div className="w-full px-8 pt-8">
+                    {/* Hero Section with Home Button */}
+                    <div className="text-center mb-16 relative">
                         <button
                             onClick={handleHome}
-                            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-2.5 rounded-xl font-medium border border-gray-200 transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                            className="absolute top-0 right-0 bg-white/80 hover:bg-white text-gray-700 px-8 py-3 rounded-2xl font-medium border border-purple-200/50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                         >
                             <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                             Home
                         </button>
+                        <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-5xl font-bold text-gray-800 mb-4">Customize Your Quiz</h2>                        
                     </div>
-                </div>
 
-                {/* Main Content */}
-                <div className="max-w-4xl mx-auto p-6">
-                    <div className="bg-white/90 backdrop-blur-sm border border-white/20 rounded-3xl shadow-2xl overflow-hidden">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-purple-500 to-blue-600 p-8 text-white">
-                            <div className="text-center">
-                                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
+                    {/* Alert Section */}
+                    <div className="max-w-4xl mx-auto mb-12">
+                        <div className="bg-amber-50/80 backdrop-blur-sm border border-amber-200/50 rounded-2xl p-6">
+                            <div className="flex items-start">
+                                <svg className="w-6 h-6 text-amber-600 mr-4 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div className="space-y-2">
+                                    <p className="text-amber-800 font-medium text-lg">📝 Please ensure total number of questions is more than 0</p>
+                                    <p className="text-amber-800 font-medium text-lg">⏱️ Please ensure time per question is greater than 0 in seconds</p>
                                 </div>
-                                <h2 className="text-3xl font-bold mb-2">Customize Your Quiz</h2>
-                                <p className="text-purple-100">Configure your quiz settings and question distribution</p>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Form Content */}
-                        <div className="p-8">
-                            {/* Total Questions Alert */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
-                                <div className="flex items-center">
-                                    <svg className="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <p className="text-blue-800 font-medium">Total Questions Required: 30</p>
-                                        <p className="text-blue-600 text-sm">Please ensure the sum of all difficulty levels equals exactly 30 questions</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <form className="space-y-8">
+                    {/* Form Section */}
+                    <div className="max-w-6xl mx-auto">
+                        <form className="space-y-16">
+                            {/* Topic Selection and Time Per Question */}
+                            <div className="grid lg:grid-cols-2 gap-8">
                                 {/* Topic Selection */}
-                                <div className="space-y-3">
-                                    <label htmlFor="category" className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                        <svg className="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="text-center">
+                                    <label htmlFor="category" className="flex items-center justify-center text-2xl font-bold text-gray-700 mb-8">
+                                        <svg className="w-6 h-6 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                         </svg>
                                         Select Topic *
@@ -248,7 +233,7 @@ export default function QuizHome() {
                                         value={question.category}
                                         onChange={onChange}
                                         required
-                                        className="w-full max-w-md border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all duration-200 bg-gray-50/50 text-gray-800"
+                                        className="w-full border-2 border-purple-200 px-6 py-4 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-400 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 text-lg font-medium"
                                     >
                                         <option value="">Choose a topic</option>
                                         <option value="Maths">📊 Mathematics</option>
@@ -259,115 +244,137 @@ export default function QuizHome() {
                                     </select>
                                 </div>
 
-                                {/* Question Distribution */}
-                                <div className="space-y-6">
-                                    <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                                        <svg className="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                {/* Time Per Question */}
+                                <div className="text-center">
+                                    <label htmlFor="timePerQuestion" className="flex items-center justify-center text-2xl font-bold text-gray-700 mb-8">
+                                        <svg className="w-6 h-6 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        Question Distribution
-                                    </h3>
+                                        Time Per Question (Seconds) *
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="timePerQuestion"
+                                        name="timePerQuestion"
+                                        value={question.timePerQuestion}
+                                        onChange={onChange}
+                                        min="0"
+                                        required
+                                        className="w-full border-2 border-purple-200 px-6 py-4 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-400 outline-none transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 text-center text-lg font-medium"
+                                        placeholder="30"
+                                    />
+                                </div>
+                            </div>
 
-                                    <div className="grid md:grid-cols-3 gap-6">
-                                        {/* Easy Questions */}
-                                        <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                                            <div className="flex items-center mb-3">
-                                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
-                                                    <span className="text-white text-sm font-bold">E</span>
-                                                </div>
-                                                <label htmlFor="numberOfEasy" className="text-sm font-semibold text-green-700">
-                                                    Easy Questions
-                                                </label>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                id="numberOfEasy"
-                                                name="numberOfEasy"
-                                                value={question.numberOfEasy}
-                                                onChange={onChange}
-                                                min="0"
-                                                required
-                                                className="w-full border border-green-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200 bg-white text-gray-800 text-center text-lg font-semibold"
-                                                placeholder="0"
-                                            />
-                                        </div>
+                            {/* Question Distribution */}
+                            <div className="space-y-12">
+                                <h3 className="text-3xl font-bold text-gray-800 text-center flex items-center justify-center">
+                                    <svg className="w-7 h-7 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    Question Distribution
+                                </h3>
 
-                                        {/* Medium Questions */}
-                                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-                                            <div className="flex items-center mb-3">
-                                                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mr-3">
-                                                    <span className="text-white text-sm font-bold">M</span>
-                                                </div>
-                                                <label htmlFor="numberOfMedium" className="text-sm font-semibold text-yellow-700">
-                                                    Medium Questions
-                                                </label>
+                                <div className="grid lg:grid-cols-3 gap-8">
+                                    {/* Easy Questions */}
+                                    <div className="bg-green-50/80 backdrop-blur-sm border-2 border-green-200 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                                        <div className="text-center mb-6">
+                                            <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                                <span className="text-white text-2xl font-bold">E</span>
                                             </div>
-                                            <input
-                                                type="number"
-                                                id="numberOfMedium"
-                                                name="numberOfMedium"
-                                                value={question.numberOfMedium}
-                                                onChange={onChange}
-                                                min="0"
-                                                required
-                                                className="w-full border border-yellow-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition-all duration-200 bg-white text-gray-800 text-center text-lg font-semibold"
-                                                placeholder="0"
-                                            />
+                                            <label htmlFor="numberOfEasy" className="text-xl font-bold text-green-700">
+                                                Easy Questions
+                                            </label>
                                         </div>
-
-                                        {/* Hard Questions */}
-                                        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                                            <div className="flex items-center mb-3">
-                                                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mr-3">
-                                                    <span className="text-white text-sm font-bold">H</span>
-                                                </div>
-                                                <label htmlFor="numberOfHard" className="text-sm font-semibold text-red-700">
-                                                    Hard Questions
-                                                </label>
-                                            </div>
-                                            <input
-                                                type="number"
-                                                id="numberOfHard"
-                                                name="numberOfHard"
-                                                value={question.numberOfHard}
-                                                onChange={onChange}
-                                                min="0"
-                                                required
-                                                className="w-full border border-red-200 px-4 py-3 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all duration-200 bg-white text-gray-800 text-center text-lg font-semibold"
-                                                placeholder="0"
-                                            />
-                                        </div>
+                                        <input
+                                            type="number"
+                                            id="numberOfEasy"
+                                            name="numberOfEasy"
+                                            value={question.numberOfEasy}
+                                            onChange={onChange}
+                                            min="0"
+                                            required
+                                            className="w-full border-2 border-green-200 px-6 py-4 rounded-2xl focus:ring-4 focus:ring-green-200 focus:border-green-400 outline-none transition-all duration-300 bg-white text-gray-800 text-center text-2xl font-bold"
+                                            placeholder="0"
+                                        />
                                     </div>
 
-                                    {/* Total Counter */}
-                                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-700 font-medium">Total Questions:</span>
-                                            <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${(parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0) === 30
-                                                ? 'text-green-600 bg-green-100'
-                                                : 'text-red-600 bg-red-100'
-                                                }`}>
-                                                {(parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0)} / 30
+                                    {/* Medium Questions */}
+                                    <div className="bg-yellow-50/80 backdrop-blur-sm border-2 border-yellow-200 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                                        <div className="text-center mb-6">
+                                            <div className="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                                <span className="text-white text-2xl font-bold">M</span>
                                             </div>
+                                            <label htmlFor="numberOfMedium" className="text-xl font-bold text-yellow-700">
+                                                Medium Questions
+                                            </label>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            id="numberOfMedium"
+                                            name="numberOfMedium"
+                                            value={question.numberOfMedium}
+                                            onChange={onChange}
+                                            min="0"
+                                            required
+                                            className="w-full border-2 border-yellow-200 px-6 py-4 rounded-2xl focus:ring-4 focus:ring-yellow-200 focus:border-yellow-400 outline-none transition-all duration-300 bg-white text-gray-800 text-center text-2xl font-bold"
+                                            placeholder="0"
+                                        />
+                                    </div>
+
+                                    {/* Hard Questions */}
+                                    <div className="bg-red-50/80 backdrop-blur-sm border-2 border-red-200 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                                        <div className="text-center mb-6">
+                                            <div className="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                                <span className="text-white text-2xl font-bold">H</span>
+                                            </div>
+                                            <label htmlFor="numberOfHard" className="text-xl font-bold text-red-700">
+                                                Hard Questions
+                                            </label>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            id="numberOfHard"
+                                            name="numberOfHard"
+                                            value={question.numberOfHard}
+                                            onChange={onChange}
+                                            min="0"
+                                            required
+                                            className="w-full border-2 border-red-200 px-6 py-4 rounded-2xl focus:ring-4 focus:ring-red-200 focus:border-red-400 outline-none transition-all duration-300 bg-white text-gray-800 text-center text-2xl font-bold"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Total Counter and Generate Button */}
+                            <div className="flex flex-col lg:flex-row items-center justify-center gap-8">
+                                {/* Total Counter */}
+                                <div className="bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-3xl p-8 shadow-xl">
+                                    <div className="flex items-center gap-6">
+                                        <span className="text-gray-700 font-bold text-xl">Total Questions:</span>
+                                        <div className={`text-4xl font-bold px-6 py-3 rounded-2xl shadow-lg ${(parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0) > 0
+                                            ? 'text-green-600 bg-green-100'
+                                            : 'text-red-600 bg-red-100'
+                                            }`}>
+                                            {(parseInt(question.numberOfEasy) || 0) + (parseInt(question.numberOfMedium) || 0) + (parseInt(question.numberOfHard) || 0)}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Submit Button */}
-                                <div className="pt-6 border-t border-gray-100">
-                                    <button
-                                        type="button"
-                                        onClick={handleSubmit}
-                                        className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                                    >
-                                        <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        Generate Quiz
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                                {/* Generate Quiz Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white py-6 px-12 rounded-3xl font-bold text-xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:ring-offset-2"
+                                >
+                                    <svg className="w-6 h-6 inline mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    Generate Quiz
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -376,7 +383,7 @@ export default function QuizHome() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            <Outlet context={{ questions, answers, score, startQuiz, finishQuiz }} />
+            <Outlet context={{ questions, startQuiz, finishQuiz }} />
         </div>
     );
 }
