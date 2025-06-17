@@ -15,6 +15,7 @@ export default function Logout() {
       const token = sessionStorage.getItem('token');  
       const response = await fetch(`${BASE_URL}/logout` + `?token=${token}`, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -23,7 +24,7 @@ export default function Logout() {
       clearTimeout(timeoutId);
       logOutFromUI();
     } catch (err) {
-        console.error('Logout failed:', err);
+        console.error(err);
         logOutFromUI();        
     }    
     }

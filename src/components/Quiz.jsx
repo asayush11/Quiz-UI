@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
 
 export default function Quiz() {
@@ -22,8 +22,19 @@ export default function Quiz() {
     return () => clearInterval(timer);
   }, [current]);
 
+  const useCurrentLocation = () => {
+    const location = useLocation().pathname;
+    if( location === '/Sample/quiz') {
+      return false;
+    } return true;
+  }
+
   const handleRefresh = () => {
-      window.location.href = '/Sample/result';
+      if(useCurrentLocation()) {
+        window.location.href = '/user/quizHome/result';
+      } else {
+        window.location.href = '/Sample/result';
+      }
   }
 
   const handleNext = () => {

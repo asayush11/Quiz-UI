@@ -54,7 +54,7 @@ export default function MathsQuiz() {
   };
 
   useEffect(() => {
-    const storedAnswers = sessionStorage.getItem('answers');
+    const storedAnswers = JSON.parse(sessionStorage.getItem('answers'));
     if ((storedAnswers === null || storedAnswers.length === 0 ) && questions.length === 0) {
       const data = generateQuestions();
       setQuestions(data);

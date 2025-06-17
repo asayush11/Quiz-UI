@@ -82,7 +82,7 @@ export default function QuizHome() {
                 if (data.data.length === 0) {
                     toast.error('We are adding questions....Please stay tuned!');
                 }
-                else if (data.data.length < 30) {
+                else if (data.data.length < easy + medium + hard) {
                     handleInsufficientQuestion(data);
                 }
                 else {
@@ -174,7 +174,8 @@ export default function QuizHome() {
         );
     }
 
-    if (questions.length === 0) {
+    const answerList = JSON.parse(sessionStorage.getItem('answers'));
+    if ((!answerList || answerList.length === 0) && questions.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100">
                 {/* Main Content - Full Screen */}

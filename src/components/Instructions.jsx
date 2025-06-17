@@ -186,7 +186,7 @@ export default function Instructions() {
             </div>
             <div>
               <h3 className="font-bold text-xl mb-1">Important Warning</h3>
-              <p className="text-red-100">Avoid refreshing the page during the quiz to prevent data loss. Once you start, complete the entire quiz in one session.</p>
+              <p className="text-red-100">Avoid refreshing the page during the quiz, it will end the quiz. Once you start, complete the entire quiz in one session.</p>
             </div>
           </div>
         </div>

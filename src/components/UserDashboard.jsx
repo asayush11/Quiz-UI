@@ -3,8 +3,9 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, Outlet } from 'react-router-dom';
 
-export default function UserDashboard() {
-
+export default function UserDashboard() {  
+  sessionStorage.removeItem('score');
+  sessionStorage.removeItem('answers');
   const navigate = useNavigate();
   const handleQuestion = () => {
     navigate('question');
