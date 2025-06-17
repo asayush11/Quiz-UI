@@ -167,7 +167,7 @@ export default function QuizHome() {
         );
     };
 
-    if (sessionStorage.getItem('token')) {
+    if (!sessionStorage.getItem('token')) {
         return (
             toast.error('Please login to access this page.'),
             window.location.href = '/login'
