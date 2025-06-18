@@ -49,6 +49,8 @@ export default function Login() {
       }
       sessionStorage.setItem('token', data.data.token);
       sessionStorage.setItem('user', data.data.username);
+      sessionStorage.setItem('numberOfQuizzes', data.data.numberOfQuizzes);
+      sessionStorage.setItem('numberOfQuestions', data.data.numberOfQuestions);
       toast.success('Login successful!');
       handleUserHome();
     } catch (err) {

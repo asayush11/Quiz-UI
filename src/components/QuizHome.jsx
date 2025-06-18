@@ -99,6 +99,8 @@ export default function QuizHome() {
     const startQuiz = () => {
         sessionStorage.setItem('score', 0);
         sessionStorage.setItem('answers', JSON.stringify([]));
+        const numberOfQuizzes = sessionStorage.getItem('numberOfQuizzes') || 0;
+        sessionStorage.setItem('numberOfQuizzes', parseInt(numberOfQuizzes) + 1);
         navigate('quiz');
     }
 

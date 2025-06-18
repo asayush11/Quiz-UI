@@ -19,10 +19,7 @@ export default function Question() {
     e.preventDefault();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      controller.abort();
-      toast.success('Thank you for your contribution! Your question will be reviewed shortly.');
-      setQuestion({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
-      setDisableSubmit(false);
+      controller.abort();      
       return;
     }, 5000);
     try {
@@ -59,11 +56,17 @@ export default function Question() {
       }
       if (response.status === 201) {
         toast.success(data.message);
+        const numberOfQuestions = sessionStorage.getItem('numberOfQuestions') || 0;
+        sessionStorage.setItem('numberOfQuestions', parseInt(numberOfQuestions) + 1);
         setQuestion({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
         return;
       }
     } catch (err) {
       console.log('Network error. Please try again later.');
+      toast.success('Thank you for your contribution! Your question will be reviewed shortly.');
+      const numberOfQuestions = sessionStorage.getItem('numberOfQuestions') || 0;
+      sessionStorage.setItem('numberOfQuestions', parseInt(numberOfQuestions) + 1);
+      setQuestion({ category: "", question: "", option1: "", option2: "", option3: "", option4: "", difficulty: "", solution: "" });
       setDisableSubmit(false);
     }
   };

@@ -33,6 +33,8 @@ export default function Logout() {
       setLoggedOut(true);
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
+      sessionStorage.removeItem('numberOfQuizzes');
+      sessionStorage.removeItem('numberOfQuestions');
       toast.success('You have been logged out successfully.');
       window.location.href = '/';
     }

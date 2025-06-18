@@ -7,6 +7,8 @@ export default function Home() {
   sessionStorage.removeItem('score');
   sessionStorage.removeItem('answers');
   sessionStorage.removeItem('timePerQuestion');
+  sessionStorage.removeItem('numberOfQuizzes');
+  sessionStorage.removeItem('numberOfQuestions');
 
   const navigate = useNavigate();
 
