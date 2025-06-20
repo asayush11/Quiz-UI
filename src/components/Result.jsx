@@ -33,96 +33,260 @@ export default function Result() {
 
   const performance = getPerformanceLevel();
 
-  // PDF Download Function
-  const downloadPDF = () => {
-    const printContent = document.getElementById('results-content');
-    const originalDisplay = printContent.style.display;
-    
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Quiz Results</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; }
-            .score-section { text-align: center; margin-bottom: 30px; }
-            .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-            .stat-card { border: 1px solid #e5e7eb; padding: 15px; text-align: center; border-radius: 8px; }
-            .question-item { margin-bottom: 25px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-            .question-header { padding: 15px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-            .question-content { padding: 20px; }
-            .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-            .answer-box { padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
-            .correct-answer { background-color: #f0fdf4; border-color: #bbf7d0; }
-            .user-answer { background-color: #f9fafb; }
-            .explanation { background-color: #eff6ff; padding: 15px; border-radius: 8px; margin-top: 15px; }
-            .correct { border-color: #22c55e; }
-            .incorrect { border-color: #ef4444; }
-            h1, h2, h3 { color: #1f2937; }
-            .performance-badge { display: inline-block; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin: 10px 0; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Quiz Results Report (${sessionStorage.getItem('category')})</h1>
-            <div class="performance-badge" style="background-color: #e5e7eb;">${performance.level}</div>
-          </div>
-          
-          <div class="score-section">
-            <h2>Final Score: ${score} / ${totalQuestions} (${percentage}%)</h2>
-          </div>
-          
-          <div class="stats-grid">
-            
-            <div class="stat-card">
-              <h3 style="color: #22c55e; margin: 0;">${correctAnswers}</h3>
-              <p>Correct Answers</p>
-            </div>
-            <div class="stat-card">
-              <h3 style="color: #ef4444; margin: 0;">${2*correctAnswers - 2*score}</h3>
-              <p>Incorrect Answers</p>
-            </div>
-            <div class="stat-card">
-              <h3 style="color: #3b82f6; margin: 0;">${totalQuestions - 3*correctAnswers + 2*score}</h3>
-              <p>Unattempted</p>
-            </div>            
-          </div>
-          
-          <h2>Detailed Review</h2>
-          ${answers.map((ans, idx) => `
-            <div class="question-item ${ans.isCorrect ? 'correct' : 'incorrect'}">
-              <div class="question-header">
-                <strong>Question ${idx + 1}: ${ans.isCorrect ? '✓' : '✗'}</strong>
-              </div>
-              <div class="question-content">
-                <p><strong>${ans.question}</strong></p>
-                <div class="answer-grid">
-                  <div class="answer-box correct-answer">
-                    <strong>Correct Answer:</strong><br>
-                    ${ans.correct}
-                  </div>
-                  <div class="answer-box user-answer">
-                    <strong>Your Answer:</strong><br>
-                    ${ans.selected || 'No answer selected'}
-                  </div>
-                </div>
-                <div class="explanation">
-                  <strong>Explanation:</strong><br>
-                  ${ans.solution || 'No explanation available for this question.'}
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
+  // Mobile-compatible PDF download function
+const downloadPDF = () => {
+  // Check if we're on mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // Mobile-friendly approach: Create downloadable HTML file
+    downloadAsHTML();
+  } else {
+    // Desktop approach: Use print window
+    printToPDF();
+  }
+};
+
+const downloadAsHTML = () => {
+  const htmlContent = generateHTMLContent();
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  
+  // Create download link
+  const downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = `quiz-results-${new Date().toISOString().split('T')[0]}.html`;
+  downloadLink.style.display = 'none';
+  
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  
+  // Clean up
+  URL.revokeObjectURL(url);
+};
+
+const printToPDF = () => {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    // Fallback if popup is blocked
+    alert('Please allow popups for this site to download PDF, or try the mobile version.');
+    downloadAsHTML();
+    return;
+  }
+  
+  printWindow.document.write(generateHTMLContent());
+  printWindow.document.close();
+  
+  // Add a small delay to ensure content is loaded
+  setTimeout(() => {
     printWindow.print();
     printWindow.close();
-  };
+  }, 500);
+};
+
+const generateHTMLContent = () => {
+  // Get data from your app state or sessionStorage
+  const category = sessionStorage.getItem('category');
+  const score = parseInt(sessionStorage.getItem('score') || '0');
+  const incorrectAnswers = 2*correctAnswers - 2*score;
+  const unattempted = totalQuestions - correctAnswers - incorrectAnswers;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Quiz Results</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            line-height: 1.6; 
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-bottom: 2px solid #e5e7eb; 
+            padding-bottom: 20px; 
+          }
+          .score-section { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+          }
+          .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px; 
+          }
+          .stat-card { 
+            border: 1px solid #e5e7eb; 
+            padding: 15px; 
+            text-align: center; 
+            border-radius: 8px;
+            background-color: #ffffff;
+          }
+          .question-item { 
+            margin-bottom: 25px; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+            overflow: hidden;
+            page-break-inside: avoid;
+          }
+          .question-header { 
+            padding: 15px; 
+            background-color: #f9fafb; 
+            border-bottom: 1px solid #e5e7eb; 
+          }
+          .question-content { 
+            padding: 20px; 
+          }
+          .answer-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+            margin: 15px 0; 
+          }
+          @media (min-width: 600px) {
+            .answer-grid {
+              grid-template-columns: 1fr 1fr;
+            }
+          }
+          .answer-box { 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #e5e7eb; 
+          }
+          .correct-answer { 
+            background-color: #f0fdf4; 
+            border-color: #bbf7d0; 
+          }
+          .user-answer { 
+            background-color: #f9fafb; 
+          }
+          .user-answer.incorrect {
+            background-color: #fef2f2;
+            border-color: #fecaca;
+          }
+          .explanation { 
+            background-color: #eff6ff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-top: 15px; 
+          }
+          .correct { 
+            border-color: #22c55e; 
+          }
+          .incorrect { 
+            border-color: #ef4444; 
+          }
+          h1, h2, h3 { 
+            color: #1f2937; 
+          }
+          .performance-badge { 
+            display: inline-block; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            margin: 10px 0;
+            background-color: #e5e7eb;
+          }
+          @media print {
+            body { margin: 0; }
+            .question-item { page-break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Quiz Results Report</h1>
+          <p><strong>Category:</strong> ${category}</p>
+          <div class="performance-badge">${performance.level}</div>
+        </div>
+        
+        <div class="score-section">
+          <h2>Final Score: ${score} / ${totalQuestions} (${percentage}%)</h2>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 style="color: #22c55e; margin: 0;">${correctAnswers}</h3>
+            <p>Correct Answers</p>
+          </div>
+          <div class="stat-card">
+            <h3 style="color: #ef4444; margin: 0;">${incorrectAnswers}</h3>
+            <p>Incorrect Answers</p>
+          </div>
+          <div class="stat-card">
+            <h3 style="color: #3b82f6; margin: 0;">${unattempted}</h3>
+            <p>Unattempted</p>
+          </div>            
+        </div>
+        
+        <h2>Detailed Review</h2>
+        ${answers.map((ans, idx) => `
+          <div class="question-item ${ans.isCorrect ? 'correct' : 'incorrect'}">
+            <div class="question-header">
+              <strong>Question ${idx + 1}: ${ans.isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+            </div>
+            <div class="question-content">
+              <p><strong>${ans.question}</strong></p>
+              <div class="answer-grid">
+                <div class="answer-box correct-answer">
+                  <strong>Correct Answer:</strong><br>
+                  ${ans.correct}
+                </div>
+                <div class="answer-box user-answer ${ans.isCorrect ? '' : 'incorrect'}">
+                  <strong>Your Answer:</strong><br>
+                  ${ans.selected || 'No answer selected'}
+                </div>
+              </div>
+              ${ans.solution ? `
+                <div class="explanation">
+                  <strong>Explanation:</strong><br>
+                  ${ans.solution}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `).join('')}
+        
+        <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e5e7eb;">
+          <p><small>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</small></p>
+        </div>
+      </body>
+    </html>
+  `;
+};
+
+// Alternative: Using a PDF library (if you want actual PDF on mobile)
+const downloadPDFWithLibrary = async () => {
+  // You would need to include a PDF library like jsPDF or Puppeteer
+  // This is just a placeholder showing the structure
+  try {
+    const { jsPDF } = window.jspdf; // Assuming jsPDF is loaded
+    const doc = new jsPDF();
+    
+    // Add content to PDF
+    doc.text('Quiz Results', 20, 20);
+    doc.text(`Score: ${score}/${totalQuestions}`, 20, 40);
+    
+    // Save the PDF
+    doc.save('quiz-results.pdf');
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    // Fallback to HTML download
+    downloadAsHTML();
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
