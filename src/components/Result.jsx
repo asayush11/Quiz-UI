@@ -208,7 +208,7 @@ const generateHTMLContent = () => {
       <body>
         <div class="header">
           <h1>Quiz Results Report</h1>
-          <p><strong>Category:</strong> ${category}</p>
+          <p><strong>Topic:</strong> ${category}</p>
           <div class="performance-badge">${performance.level}</div>
         </div>
         
