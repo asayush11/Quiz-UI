@@ -101,6 +101,7 @@ export default function QuizHome() {
         sessionStorage.setItem('answers', JSON.stringify([]));
         const numberOfQuizzes = sessionStorage.getItem('numberOfQuizzes') || 0;
         sessionStorage.setItem('numberOfQuizzes', parseInt(numberOfQuizzes) + 1);
+        sessionStorage.setItem('category', question.category);
         navigate('quiz');
     }
 

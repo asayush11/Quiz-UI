@@ -46,6 +46,7 @@ export default function MathsQuiz() {
   const startQuiz = () => {
     sessionStorage.setItem('score', 0);
     sessionStorage.setItem('answers', JSON.stringify([]));
+    sessionStorage.setItem('category', 'Mental Maths');
     navigate('quiz');
   };
 
