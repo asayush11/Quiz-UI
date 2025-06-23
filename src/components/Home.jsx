@@ -102,7 +102,7 @@ export default function Home() {
                   className="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white font-bold py-5 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-lg"
                 >
                   <span className="mr-3">🚀</span>
-                  Try Sample Math Quiz
+                  Try Sample Maths Quiz
                 </button>
                 
                 <div className="grid md:grid-cols-1">
