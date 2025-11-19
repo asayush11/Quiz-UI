@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router-dom';
+import { getQuestions } from '../utils/sessionHelpers';
 
 export default function Instructions() {
   const navigate = useNavigate();
-  const { startQuiz, questions } = useOutletContext();
-  const numQuestions = questions.length;
-  sessionStorage.setItem('score', 0);
-  sessionStorage.setItem('answers', JSON.stringify([]));
-
+  const { startQuiz } = useOutletContext();
+  const numQuestions = getQuestions().length;
+  
   const goHome = () => {
         if(sessionStorage.getItem('token') === null) {
             window.location.href = '/';
@@ -90,10 +89,10 @@ export default function Instructions() {
 
               <div className="flex items-center space-x-4 p-4 bg-rose-50 rounded-2xl">
                 <div className="w-12 h-12 bg-rose-500 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold">{sessionStorage.getItem('timePerQuestion') || 45}s</span>
+                  <span className="text-white font-bold">{(sessionStorage.getItem('totalTime') || 1200)/60}</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">Timer per Question</h3>
+                  <h3 className="font-semibold text-gray-800">Total Time (minutes)</h3>
                   <p className="text-gray-600">Think fast and answer wisely</p>
                 </div>
               </div>

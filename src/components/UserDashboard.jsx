@@ -2,10 +2,10 @@ import React from 'react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, Outlet } from 'react-router-dom';
+import { clearQuiz } from '../utils/sessionHelpers';
 
 export default function UserDashboard() {  
-  sessionStorage.removeItem('score');
-  sessionStorage.removeItem('answers');
+  clearQuiz();
   const navigate = useNavigate();
   const handleQuestion = () => {
     navigate('question');
@@ -112,10 +112,6 @@ export default function UserDashboard() {
             <div className="text-center p-4 bg-blue-50 rounded-xl">
               <div className="text-2xl font-bold text-blue-600 mb-1">{sessionStorage.getItem('numberOfQuizzes')}</div>
               <div className="text-sm text-gray-600">Quizzes Taken</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-xl">
-              <div className="text-2xl font-bold text-green-600 mb-1">{sessionStorage.getItem('numberOfQuestions')}</div>
-              <div className="text-sm text-gray-600">Questions Added</div>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-xl">
               <div className="text-2xl font-bold text-purple-600 mb-1">---</div>

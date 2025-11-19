@@ -1,26 +1,65 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useOutletContext } from 'react-router-dom';
+import { getAnswers, getCategory, getCorrectAnswers, getQuestions } from '../utils/sessionHelpers';
 
 export default function Result() {
   const navigate = useNavigate();
-  //const { score, answers } = useOutletContext();
-  const score = parseFloat(sessionStorage.getItem('score')) || 0;
-  const answers = JSON.parse(sessionStorage.getItem('answers')) || [];
+  const answers = getAnswers();
+  const questions = getQuestions();
+  let answerKey = [];
+  if(getCorrectAnswers.length === 0) {
+    // will call an API to fetch correct answers if not present
+    answerKey = questions.map(q => q.correct);
+  } else {
+    answerKey = getCorrectAnswers();
+  }
+
+  // Scoring rules: +1 for correct, -0.5 for incorrect, 0 for unattempted
+  let score = 0;
+  let correctAnswers = 0;
+  let incorrectAnswers = 0;
+  let unattempted = 0;
+  const totalQuestions = (questions.length);
+  // Build a complete answers array aligned with the questions
+  const completeAnswers = [];
+  for (let i = 0; i < totalQuestions; i++) {
+    const q = questions[i];
+    const a = answers[i];
+    const c = answerKey[i];
+    // ensure question/correct/solution fields are present
+    completeAnswers.push({
+      question: q.question,
+      correct: c,
+      solution: q.solution,
+      selected: a,
+      isCorrect: a === c,
+    });
+  }
+
+  // Compute score & counts from completeAnswers
+  completeAnswers.forEach((ans) => {
+    if (!ans || ans.selected == null) {
+      unattempted += 1;
+    } else if (ans.isCorrect) {
+      correctAnswers += 1;
+      score += 1;
+    } else {
+      incorrectAnswers += 1;
+      score -= 0.5;
+    }
+  });
 
   const goHome = () => {
-        if(sessionStorage.getItem('token') === null) {
-            window.location.href = '/';
-            return null;
-        }
-        navigate('/user');
-        return null;
+    if (sessionStorage.getItem('token') === null) {
+      window.location.href = '/';
+      return null;
+    }
+    navigate('/user');
+    return null;
   };
 
   // Calculate percentage and performance metrics
-  const totalQuestions = answers.length;
-  const correctAnswers = answers.filter(ans => ans.isCorrect).length;
-  const percentage = Math.round((score / totalQuestions) * 100);
+  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
   // Performance level based on percentage
   const getPerformanceLevel = () => {
@@ -34,65 +73,62 @@ export default function Result() {
   const performance = getPerformanceLevel();
 
   // Mobile-compatible PDF download function
-const downloadPDF = () => {
-  // Check if we're on mobile
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    // Mobile-friendly approach: Create downloadable HTML file
-    downloadAsHTML();
-  } else {
-    // Desktop approach: Use print window
-    printToPDF();
-  }
-};
+  const downloadPDF = () => {
+    // Check if we're on mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-const downloadAsHTML = () => {
-  const htmlContent = generateHTMLContent();
-  const blob = new Blob([htmlContent], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  
-  // Create download link
-  const downloadLink = document.createElement('a');
-  downloadLink.href = url;
-  downloadLink.download = `quiz-results-${new Date().toISOString().split('T')[0]}.html`;
-  downloadLink.style.display = 'none';
-  
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-  
-  // Clean up
-  URL.revokeObjectURL(url);
-};
+    if (isMobile) {
+      // Mobile-friendly approach: Create downloadable HTML file
+      downloadAsHTML();
+    } else {
+      // Desktop approach: Use print window
+      printToPDF();
+    }
+  };
 
-const printToPDF = () => {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    // Fallback if popup is blocked
-    alert('Please allow popups for this site to download PDF, or try the mobile version.');
-    downloadAsHTML();
-    return;
-  }
-  
-  printWindow.document.write(generateHTMLContent());
-  printWindow.document.close();
-  
-  // Add a small delay to ensure content is loaded
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 500);
-};
+  const downloadAsHTML = () => {
+    const htmlContent = generateHTMLContent();
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
 
-const generateHTMLContent = () => {
-  // Get data from your app state or sessionStorage
-  const category = sessionStorage.getItem('category');
-  const score = parseInt(sessionStorage.getItem('score') || '0');
-  const incorrectAnswers = 2*correctAnswers - 2*score;
-  const unattempted = totalQuestions - correctAnswers - incorrectAnswers;
+    // Create download link
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = `quiz-results-${new Date().toISOString().split('T')[0]}.html`;
+    downloadLink.style.display = 'none';
 
-  return `
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    // Clean up
+    URL.revokeObjectURL(url);
+  };
+
+  const printToPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      // Fallback if popup is blocked
+      alert('Please allow popups for this site to download PDF, or try the mobile version.');
+      downloadAsHTML();
+      return;
+    }
+
+    printWindow.document.write(generateHTMLContent());
+    printWindow.document.close();
+
+    // Add a small delay to ensure content is loaded
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
+  const generateHTMLContent = () => {
+    // Get data from your app state or sessionStorage
+    const category = sessionStorage.getItem('category');
+
+    return `
     <!DOCTYPE html>
     <html>
       <head>
@@ -208,7 +244,7 @@ const generateHTMLContent = () => {
       <body>
         <div class="header">
           <h1>Quiz Results Report</h1>
-          <p><strong>Topic:</strong> ${category}</p>
+          <p><strong>Topic:</strong> ${getCategory()}</p>
           <div class="performance-badge">${performance.level}</div>
         </div>
         
@@ -232,10 +268,12 @@ const generateHTMLContent = () => {
         </div>
         
         <h2>Detailed Review</h2>
-        ${answers.map((ans, idx) => `
-          <div class="question-item ${ans.isCorrect ? 'correct' : 'incorrect'}">
+        ${completeAnswers.map((ans, idx) => {
+      const isCorrect = ans.isCorrect;
+      return `
+          <div class="question-item ${isCorrect ? 'correct' : 'incorrect'}">
             <div class="question-header">
-              <strong>Question ${idx + 1}: ${ans.isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong>
+              <strong>Question ${idx + 1}: ${isCorrect ? '✓ Correct' : (ans.selected == null ? 'Unattempted' : '✗ Incorrect')}</strong>
             </div>
             <div class="question-content">
               <p><strong>${ans.question}</strong></p>
@@ -244,7 +282,7 @@ const generateHTMLContent = () => {
                   <strong>Correct Answer:</strong><br>
                   ${ans.correct}
                 </div>
-                <div class="answer-box user-answer ${ans.isCorrect ? '' : 'incorrect'}">
+                <div class="answer-box user-answer ${isCorrect ? '' : 'incorrect'}">
                   <strong>Your Answer:</strong><br>
                   ${ans.selected || 'No answer selected'}
                 </div>
@@ -257,7 +295,7 @@ const generateHTMLContent = () => {
               ` : ''}
             </div>
           </div>
-        `).join('')}
+        `}).join('')}
         
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #e5e7eb;">
           <p><small>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</small></p>
@@ -265,28 +303,28 @@ const generateHTMLContent = () => {
       </body>
     </html>
   `;
-};
+  };
 
-// Alternative: Using a PDF library (if you want actual PDF on mobile)
-const downloadPDFWithLibrary = async () => {
-  // You would need to include a PDF library like jsPDF or Puppeteer
-  // This is just a placeholder showing the structure
-  try {
-    const { jsPDF } = window.jspdf; // Assuming jsPDF is loaded
-    const doc = new jsPDF();
-    
-    // Add content to PDF
-    doc.text('Quiz Results', 20, 20);
-    doc.text(`Score: ${score}/${totalQuestions}`, 20, 40);
-    
-    // Save the PDF
-    doc.save('quiz-results.pdf');
-  } catch (error) {
-    console.error('PDF generation failed:', error);
-    // Fallback to HTML download
-    downloadAsHTML();
-  }
-};
+  // Alternative: Using a PDF library (if you want actual PDF on mobile)
+  const downloadPDFWithLibrary = async () => {
+    // You would need to include a PDF library like jsPDF or Puppeteer
+    // This is just a placeholder showing the structure
+    try {
+      const { jsPDF } = window.jspdf; // Assuming jsPDF is loaded
+      const doc = new jsPDF();
+
+      // Add content to PDF
+      doc.text('Quiz Results', 20, 20);
+      doc.text(`Score: ${score}/${totalQuestions}`, 20, 40);
+
+      // Save the PDF
+      doc.save('quiz-results.pdf');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      // Fallback to HTML download
+      downloadAsHTML();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -303,7 +341,7 @@ const downloadPDFWithLibrary = async () => {
                 <span className="ml-2 text-xl font-bold text-gray-800">Quiz Results</span>
               </div>
             </div>
-            
+
             {/* Navigation Actions */}
             <div className="flex items-center space-x-4">
               <button
@@ -315,7 +353,7 @@ const downloadPDFWithLibrary = async () => {
                 </svg>
                 Download PDF
               </button>
-              
+
               <button
                 onClick={goHome}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
@@ -348,33 +386,33 @@ const downloadPDFWithLibrary = async () => {
               <h2 className="text-4xl md:text-5xl font-bold text-gray-800">
                 Quiz Complete!
               </h2>
-              
+
             </div>
 
             {/* Score Display */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-200/50 max-w-2xl mx-auto">
               <div className="text-center space-y-4">
-                
+
                 <div className="flex items-center justify-center space-x-8">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-gray-800 mb-2">{sessionStorage.getItem('category')}</div>
                   </div>
-                  
+
                   <div className="w-px h-16 bg-gray-300"></div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-gray-800 mb-2">{score}</div>
                     <div className="text-sm text-gray-500 uppercase tracking-wide font-medium">Score</div>
                   </div>
-                  
+
                   <div className="w-px h-16 bg-gray-300"></div>
-                  
+
                   <div className="text-center">
                     <div className="text-4xl font-bold text-gray-600 mb-2">{totalQuestions}</div>
                     <div className="text-sm text-gray-500 uppercase tracking-wide font-medium">Total</div>
                   </div>
-                  
+
                   <div className="w-px h-16 bg-gray-300"></div>
-                  
+
                   <div className="text-center">
                     <div className={`text-4xl font-bold mb-2 bg-gradient-to-r ${performance.color} bg-clip-text text-transparent`}>
                       {percentage}%
@@ -382,7 +420,7 @@ const downloadPDFWithLibrary = async () => {
                     <div className="text-sm text-gray-500 uppercase tracking-wide font-medium">Percentage</div>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className={`inline-block px-6 py-2 rounded-lg bg-gradient-to-r ${performance.color} text-white font-semibold`}>
                     {performance.level}
@@ -393,7 +431,7 @@ const downloadPDFWithLibrary = async () => {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-              
+
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 hover:bg-white/90 transition-all duration-300 group shadow-lg hover:shadow-xl">
                 <div className="text-center">
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -405,7 +443,7 @@ const downloadPDFWithLibrary = async () => {
                   <div className="text-gray-600 font-medium">Correct Answers</div>
                 </div>
               </div>
-              
+
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-200/50 hover:bg-white/90 transition-all duration-300 group shadow-lg hover:shadow-xl">
                 <div className="text-center">
                   <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -413,7 +451,7 @@ const downloadPDFWithLibrary = async () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
-                  <div className="text-2xl font-bold text-red-500 mb-2">{2*correctAnswers - 2*score}</div>
+                  <div className="text-2xl font-bold text-red-500 mb-2">{2 * correctAnswers - 2 * score}</div>
                   <div className="text-gray-600 font-medium">Incorrect Answers</div>
                 </div>
               </div>
@@ -424,16 +462,16 @@ const downloadPDFWithLibrary = async () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 00-2 2L13 15l-1 1v-4a2 2 0 00-2-2 2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <div className="text-2xl font-bold text-blue-600 mb-2">{totalQuestions - 3*correctAnswers + 2*score}</div>
+                  <div className="text-2xl font-bold text-blue-600 mb-2">{totalQuestions - 3 * correctAnswers + 2 * score}</div>
                   <div className="text-gray-600 font-medium">Unattempted</div>
                 </div>
-              </div>      
-              
+              </div>
+
             </div>
           </div>
         </div>
 
-         {/* Detailed Results Section */}
+        {/* Detailed Results Section */}
         <div className="bg-white/50 backdrop-blur-sm border-t border-gray-200/50 min-h-screen">
           <div className="w-full p-8">
             <div className="text-center mb-8">
@@ -442,61 +480,47 @@ const downloadPDFWithLibrary = async () => {
             </div>
 
             <div className="h-200 overflow-y-auto space-y-4">
-              {answers.map((ans, idx) => (
-                <div key={idx} className={`rounded-3xl border-2 overflow-hidden bg-white/80 backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] shadow-lg mx-auto ${
-                  ans.isCorrect
-                    ? 'border-green-200 hover:shadow-green-100'
-                    : 'border-red-200 hover:shadow-red-100'
-                }`}>
-                  {/* Question Header */}
-                  <div className={`p-4 border-b border-gray-100 ${
-                    ans.isCorrect
-                      ? 'bg-green-50'
-                      : 'bg-red-50'
-                  }`}>
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-8 rounded-full flex items-center justify-center font-bold text-white text-xl shadow-md ${
-                        ans.isCorrect ? 'bg-green-500' : 'bg-red-500'
-                      }`}>
-                        {ans.isCorrect ? '✓' : '✗'}
+              {completeAnswers.map((ans, idx) => {
+                const isCorrect = ans.isCorrect;
+                return (
+                  <div key={idx} className={`rounded-3xl border-2 overflow-hidden bg-white/80 backdrop-blur-sm transition-all duration-300 hover:scale-[1.01] shadow-lg mx-auto ${isCorrect ? 'border-green-200 hover:shadow-green-100' : 'border-red-200 hover:shadow-red-100'
+                    }`}>
+                    {/* Question Header */}
+                    <div className={`p-4 border-b border-gray-100 ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-8 rounded-full flex items-center justify-center font-bold text-white text-xl shadow-md ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`}>
+                          {isCorrect ? '✓' : '✗'}
+                        </div>
+                        <span className="font-bold text-gray-800 text-xl">Question {idx + 1}</span>
                       </div>
-                      <span className="font-bold text-gray-800 text-xl">Question {idx + 1}</span>
-                    </div>
-                  </div>
-
-                  {/* Question Content */}
-                  <div className="p-6 space-y-6">
-                    <div className="font-semibold text-gray-800 text-lg break-words">
-                      {ans.question}?
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-green-50 rounded-2xl p-4 border border-green-100">
-                        <span className="text-green-700 font-semibold text-sm uppercase tracking-wide">Correct Answer</span>
-                        <div className="font-bold text-green-800 mt-2 text-lg break-words">
-                          {ans.correct}
+                    {/* Question Content */}
+                    <div className="p-6 space-y-6">
+                      <div className="font-semibold text-gray-800 text-lg break-words">{ans.question}?</div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="bg-green-50 rounded-2xl p-4 border border-green-100">
+                          <span className="text-green-700 font-semibold text-sm uppercase tracking-wide">Correct Answer</span>
+                          <div className="font-bold text-green-800 mt-2 text-lg break-words">{ans.correct}</div>
+                        </div>
+                        <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                          <span className="text-gray-600 font-semibold text-sm uppercase tracking-wide">Your Answer</span>
+                          <div className={`font-bold mt-2 text-lg break-words ${isCorrect ? 'text-green-800' : 'text-red-600'}`}>
+                            {ans.selected || 'No answer selected'}
+                          </div>
                         </div>
                       </div>
-                      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                        <span className="text-gray-600 font-semibold text-sm uppercase tracking-wide">Your Answer</span>
-                        <div className={`font-bold mt-2 text-lg break-words ${
-                          ans.isCorrect ? 'text-green-800' : 'text-red-600'
-                        }`}>
-                          {ans.selected || 'No answer selected'}
-                        </div>
-                      </div>
-                    </div>
 
-                    {/* Explanation */}
-                    <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
-                      <span className="text-blue-700 font-semibold text-sm uppercase tracking-wide">Explanation</span>
-                      <div className="text-gray-700 mt-3 leading-relaxed break-words">
-                        {ans.solution || 'No explanation available for this question.'}
+                      {/* Explanation */}
+                      <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
+                        <span className="text-blue-700 font-semibold text-sm uppercase tracking-wide">Explanation</span>
+                        <div className="text-gray-700 mt-3 leading-relaxed break-words">{ans.solution || 'No explanation available for this question.'}</div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

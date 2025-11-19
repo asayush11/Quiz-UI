@@ -1,15 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { clearAll } from '../utils/sessionHelpers';
 
 export default function Home() {
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('user');
-  sessionStorage.removeItem('score');
-  sessionStorage.removeItem('answers');
-  sessionStorage.removeItem('timePerQuestion');
-  sessionStorage.removeItem('numberOfQuizzes');
-  sessionStorage.removeItem('numberOfQuestions');
-  sessionStorage.removeItem('category');
+  clearAll();
 
   const navigate = useNavigate();
 

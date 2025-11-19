@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { getQuestions, setQuestions, initAnswers, setTotalTime, setCategory, setCurrent, getAnswers, setCorrectAnswers, initMarked } from '../utils/sessionHelpers';
 
 export default function MathsQuiz() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]);
   const operations = ['+', '-', '*', '/'];
-  sessionStorage.removeItem('timePerQuestion');
 
   const generateQuestions = () => {
     const generated = [];
@@ -44,9 +43,6 @@ export default function MathsQuiz() {
   const shuffle = (array) => array.sort(() => 0.5 - Math.random());
 
   const startQuiz = () => {
-    sessionStorage.setItem('score', 0);
-    sessionStorage.setItem('answers', JSON.stringify([]));
-    sessionStorage.setItem('category', 'Mental Maths');
     navigate('quiz');
   };
 
@@ -55,17 +51,27 @@ export default function MathsQuiz() {
   };
 
   useEffect(() => {
-    const storedAnswers = JSON.parse(sessionStorage.getItem('answers'));
-    if ((storedAnswers === null || storedAnswers.length === 0 ) && questions.length === 0) {
-      const data = generateQuestions();
-      setQuestions(data);
+    const storedAnswers = getAnswers();
+    const questions = getQuestions();
+    if ((storedAnswers === null || storedAnswers.length === 0) && questions.length === 0) {
+      setCategory('Mental Maths');
+      const generated = generateQuestions();
+      setQuestions(generated);
+      // initialize answers array with nulls
+      initAnswers(generated.length);
+  // initialize marked-for-review array
+  initMarked(generated.length);
+      // persist totalTime if available elsewhere (keep previous behavior)
+      setTotalTime(1200);
+      setCurrent(0);
+      setCorrectAnswers();
       navigate('instructions');
     }
-  }, [questions, navigate]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <Outlet context={{ questions, startQuiz, finishQuiz }} />
+      <Outlet context={{ startQuiz, finishQuiz }} />
     </div>
   );
 }

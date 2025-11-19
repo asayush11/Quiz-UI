@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
 import { useState } from 'react';
+import { clearAll } from '../utils/sessionHelpers';
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/users';
 
 export default function Logout() {
@@ -31,10 +32,7 @@ export default function Logout() {
 
     const logOutFromUI = () => {
       setLoggedOut(true);
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('user');
-      sessionStorage.removeItem('numberOfQuizzes');
-      sessionStorage.removeItem('numberOfQuestions');
+      clearAll();
       toast.success('You have been logged out successfully.');
       window.location.href = '/';
     }

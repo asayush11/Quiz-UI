@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Outlet } from 'react-router-dom';
+import { getQuestions, setQuestions, initAnswers, setTotalTime, setCategory, setCurrent, getAnswers, initMarked } from '../utils/sessionHelpers';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL + '/questions';
 
 export default function QuizHome() {
 
     const navigate = useNavigate();
-    const [questions, setQuestions] = useState([]);
-    const [question, setQuestion] = useState({ category: "", numberOfEasy: 0, numberOfMedium: 0, numberOfHard: 0, timePerQuestion: 0 });
+    const [question, setQuestion] = useState({ category: "", numberOfEasy: 0, numberOfMedium: 0, numberOfHard: 0, totalTime: 0 });
 
     const onChange = (e) => {
         setQuestion({ ...question, [e.target.name]: e.target.value })
@@ -37,9 +37,9 @@ export default function QuizHome() {
         if (easy + medium + hard === 0) {
             toast.error('Please ensure total number of questions is greater than 0');
             return;
-        }        
-        if (question.timePerQuestion <= 0) {
-            toast.error('Please ensure time per question is greater than 0 in seconds');
+        }
+        if (question.totalTime <= 0) {
+            toast.error('Please ensure total time is greater than 0 in seconds');
             return;
         }
         const controller = new AbortController();
@@ -97,11 +97,8 @@ export default function QuizHome() {
     }
 
     const startQuiz = () => {
-        sessionStorage.setItem('score', 0);
-        sessionStorage.setItem('answers', JSON.stringify([]));
         const numberOfQuizzes = sessionStorage.getItem('numberOfQuizzes') || 0;
         sessionStorage.setItem('numberOfQuizzes', parseInt(numberOfQuizzes) + 1);
-        sessionStorage.setItem('category', question.category);
         navigate('quiz');
     }
 
@@ -116,7 +113,14 @@ export default function QuizHome() {
             generated.push({ question: data[i].question, difficulty: data[i].difficulty, solution: data[i].solution, correct, options: shuffle(options) });
         }
         setQuestions(generated);
-        sessionStorage.setItem('timePerQuestion', question.timePerQuestion);
+        // initialize answers array
+        initAnswers(generated.length);
+        // initialize marked-for-review array
+        initMarked(generated.length);
+        // persist total time
+        setTotalTime(question.totalTime);
+        setCurrent(0);
+        setCategory(question.category);
         navigate('instructions');
     }
 
@@ -177,7 +181,8 @@ export default function QuizHome() {
         );
     }
 
-    const answerList = JSON.parse(sessionStorage.getItem('answers'));
+    const answerList = getAnswers;
+    const questions = getQuestions();
     if ((!answerList || answerList.length === 0) && questions.length === 0) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-100">
@@ -200,7 +205,7 @@ export default function QuizHome() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
-                        <h2 className="text-5xl font-bold text-gray-800 mb-4">Customize Your Quiz</h2>                        
+                        <h2 className="text-5xl font-bold text-gray-800 mb-4">Customize Your Quiz</h2>
                     </div>
 
                     {/* Alert Section */}
@@ -248,19 +253,19 @@ export default function QuizHome() {
                                     </select>
                                 </div>
 
-                                {/* Time Per Question */}
+                                {/* Total Time */}
                                 <div className="text-center">
-                                    <label htmlFor="timePerQuestion" className="flex items-center justify-center text-2xl font-bold text-gray-700 mb-8">
+                                    <label htmlFor="totalTime" className="flex items-center justify-center text-2xl font-bold text-gray-700 mb-8">
                                         <svg className="w-6 h-6 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        Time Per Question (Seconds) *
+                                        Quiz Time (Seconds) *
                                     </label>
                                     <input
                                         type="number"
-                                        id="timePerQuestion"
-                                        name="timePerQuestion"
-                                        value={question.timePerQuestion}
+                                        id="totalTime"
+                                        name="totalTime"
+                                        value={question.totalTime}
                                         onChange={onChange}
                                         min="0"
                                         required
@@ -387,7 +392,7 @@ export default function QuizHome() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            <Outlet context={{ questions, startQuiz, finishQuiz }} />
+            <Outlet context={{ startQuiz, finishQuiz }} />
         </div>
     );
 }
